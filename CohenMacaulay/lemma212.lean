@@ -21,11 +21,16 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   have : ∃ p ∈ associatedPrimes R M, (Module.annihilator R N : Set R) ⊆ (p : Set R) := by
     sorry
   rcases this with ⟨p, pass, hp⟩
+  let _ := pass.isPrime
   let p' : PrimeSpectrum R := ⟨p, pass.isPrime⟩
-  have : p' ∈ Module.support R N := Module.mem_support_iff_of_finite.mpr hp
-  rw [Module.mem_support_iff] at this
-
-
+  have loc_ne_zero : p' ∈ Module.support R N := Module.mem_support_iff_of_finite.mpr hp
+  rw [Module.mem_support_iff] at loc_ne_zero
+  let Rₚ := Localization.AtPrime p
+  let Nₚ := LocalizedModule p'.asIdeal.primeCompl N
+  have : (⊤ : Submodule R Nₚ) ≠ p'.asIdeal • (⊤ : Submodule R Nₚ) := by
+    let _ : Module.Finite R Nₚ := sorry
+    apply Submodule.top_ne_ideal_smul_of_le_jacobson_annihilator
+    sorry
 
 
   sorry
