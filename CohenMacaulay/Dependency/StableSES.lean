@@ -5,9 +5,10 @@ variable {C : Type*} [Category C] [Limits.HasZeroMorphisms C]
 
 class StableSES (P : C -> Prop) : Prop where
   of_isZero : (X : C) → Limits.IsZero X → P X
-  stability : (S : ShortComplex C) -> S.Exact -> P (S.X₁) -> P (S.X₃) -> P (S.X₂)
+  stability : (S : ShortComplex C) -> S.ShortExact -> P (S.X₁) -> P (S.X₃) -> P (S.X₂)
 
-theorem iso_trans_of_StableSES [Limits.HasZeroObject C] (P : C → Prop) [StableSES P] {X Y : C} (h : Iso X Y) : P X ↔ P Y := sorry
+theorem iso_trans_of_StableSES [Limits.HasZeroObject C] (P : C → Prop) [S : StableSES P] {X Y : C} (h : Iso X Y) : P X ↔ P Y := by
+  sorry
 
 section ModuleCat
 
