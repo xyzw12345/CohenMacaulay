@@ -8,6 +8,17 @@ import «CohenMacaulay».Dependency.StableSES
 universe u v
 variable (R : Type u) (M : Type v) [CommRing R] [AddCommGroup M] [Module R M] [Module.Finite R M]
 
+private theorem RelSeries_smash_helper {α : Type*} {r : α → α → Prop} {s : α → α → Prop}
+    (p : RelSeries r) (q : RelSeries r) (connect : p.last = q.head)
+    (hp : ∀ (i : Fin p.length), s (p (Fin.castSucc i)) (p i.succ))
+    (hq : ∀ (i : Fin q.length), s (q (Fin.castSucc i)) (q i.succ)) :
+    ∀ (i : Fin (RelSeries.smash p q connect).length), s ((RelSeries.smash p q connect) (Fin.castSucc i)) ((RelSeries.smash p q connect) i.succ) := by
+  let p' : RelSeries (r ⊓ s) := ⟨p.length, p.toFun, fun i ↦ ⟨p.step i, hp i⟩⟩
+  let q' : RelSeries (r ⊓ s) := ⟨q.length, q.toFun, fun i ↦ ⟨q.step i, hq i⟩⟩
+  let pq' : RelSeries (r ⊓ s) := RelSeries.smash p' q' connect
+  exact fun i ↦ (pq'.step i).2
+
+set_option synthInstance.maxHeartbeats 400000 in
 theorem exists_LTSeries_quotient_cyclic:
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
     ∀ (i : Fin p.length), ∃ P : Ideal R, Nonempty (
@@ -28,9 +39,9 @@ theorem exists_LTSeries_quotient_cyclic:
     let pMN' : LTSeries (Submodule R M) := LTSeries.map pMN (Submodule.comap (Submodule.mkQ N))
       (Submodule.comap_strictMono_of_surjective <| Submodule.mkQ_surjective N)
     refine ⟨RelSeries.smash pN' pMN' (by simp [pN', pMN', hpN2, hpMN1]), by simp [pN', hpN1], by simp [pMN', hpMN2], ?_⟩
-    apply Fin.addCases
+    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R, Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
     · intro i
-      erw [Fin.castSucc_castAdd, Fin.succ_castAdd]
+      obtain ⟨P, ⟨hP'⟩⟩ := hPN3 i
       sorry
     · sorry
   · infer_instance
