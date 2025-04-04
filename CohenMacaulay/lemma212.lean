@@ -3,7 +3,16 @@ import Mathlib.RingTheory.Spectrum.Prime.Defs
 import Mathlib.RingTheory.Support
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
+open IsLocalRing
+
 variable {R M N : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
+
+lemma mem_associatePrimes_LocalizedModule_iff {p : Ideal R} [hp : p.IsPrime] :
+    maximalIdeal (Localization.AtPrime p) ∈
+    associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M)
+    ↔ p ∈ associatedPrimes R M := by
+
+  sorry
 
 lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
     (mem_ann : r ∈ Module.annihilator R N) : Subsingleton (N →ₗ[R] M) := by
