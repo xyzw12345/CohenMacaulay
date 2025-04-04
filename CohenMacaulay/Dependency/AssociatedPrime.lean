@@ -42,8 +42,7 @@ theorem exists_LTSeries_quotient_cyclic:
             R ⧸ (Ideal.torsionOf R N a) := by
           rw [Submodule.range_subtype, hN]
           exact (Ideal.quotTorsionOfEquivSpanSingleton R N a).symm
-        exact (LinearMap.quotKerEquivRange
-          <| Submodule.subtype (⊤ : Submodule R N)).trans equiv
+        exact (LinearMap.quotKerEquivRange <| Submodule.subtype _).trans equiv
     · exact ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
       ⟨rfl, ⟨subsingleton_iff_bot_eq_top.2 <|
         not_nontrivial_iff_subsingleton.1 htri, fun i ↦ Fin.elim0 i⟩⟩⟩
@@ -73,7 +72,8 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
     ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ P))
   show P (ModuleCat.of R M)
   apply fg_induction
-  · sorry
+  · exact fun _ _ ↦ ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
+      ⟨rfl, ⟨Submodule.eq_bot_of_subsingleton.symm, fun i ↦ Fin.elim0 i⟩⟩⟩
   · sorry
   · sorry
   · infer_instance
