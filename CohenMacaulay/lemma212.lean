@@ -8,3 +8,9 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
   have : r • (f x) = r • 0 := by
     rw [smul_zero, ← map_smul, Submodule.mem_annihilator.mp mem_ann x trivial, map_zero]
   simpa using reg this
+
+lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
+    (hom0 : Subsingleton (N →ₗ[R] M)) :
+    ∃ r ∈ (⊤ : Submodule R N).annihilator, IsSMulRegular M r := by
+
+  sorry
