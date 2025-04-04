@@ -12,5 +12,12 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
 lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
     (hom0 : Subsingleton (N →ₗ[R] M)) :
     ∃ r ∈ (⊤ : Submodule R N).annihilator, IsSMulRegular M r := by
+  by_contra! h
+  have : ((⊤ : Submodule R N).annihilator : Set R) ⊆ ⋃ p ∈ associatedPrimes R M, (p : Set R) := by
+    rw [biUnion_associatedPrimes_eq_compl_regular R M]
+    exact fun r hr ↦ h r hr
+  have : ∃ p ∈ associatedPrimes R M, ((⊤ : Submodule R N).annihilator : Set R) ⊆ (p : Set R) := by
+
+    sorry
 
   sorry
