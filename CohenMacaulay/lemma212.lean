@@ -7,7 +7,7 @@ open IsLocalRing
 
 variable {R M N : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
 
-lemma mem_associatePrimes_LocalizedModule_iff {p : Ideal R} [hp : p.IsPrime] :
+lemma mem_associatePrimes_localizedModule_iff {p : Ideal R} [hp : p.IsPrime] :
     maximalIdeal (Localization.AtPrime p) ∈
     associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M)
     ↔ p ∈ associatedPrimes R M := by
@@ -37,13 +37,24 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   rw [Module.mem_support_iff] at loc_ne_zero
   let Rₚ := Localization.AtPrime p
   let Nₚ := LocalizedModule p'.asIdeal.primeCompl N
+  let Mₚ := LocalizedModule p'.asIdeal.primeCompl M
   have : (⊤ : Submodule Rₚ Nₚ) ≠
     (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Nₚ) := by
     apply Submodule.top_ne_ideal_smul_of_le_jacobson_annihilator
     exact IsLocalRing.maximalIdeal_le_jacobson (Module.annihilator Rₚ Nₚ)
-  let Nₚ' := Nₚ⧸ (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Nₚ)
-  let _ : Module p.ResidueField Nₚ' := by
-
-    sorry
-
+  let Nₚ' := Nₚ ⧸ (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Nₚ)
+  let Mₚ' := Mₚ ⧸ (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Mₚ)
+  let _ : Module p.ResidueField Nₚ' :=
+    Module.instQuotientIdealSubmoduleHSMulTop Nₚ (maximalIdeal (Localization.AtPrime p))
+  have := AssociatePrimes.mem_iff.mp (mem_associatePrimes_localizedModule_iff.mpr pass)
+  rcases this.2 with ⟨x, hx⟩
+  let to_res : Nₚ →ₗ[Rₚ] p.ResidueField := sorry
+  --need surjective
+  let i : p.ResidueField →ₗ[Rₚ] Mₚ := sorry
+  --need injective
+  let f := i.comp to_res
+  have f_ne0 : f ≠ 0 := sorry
+  absurd hom0
+  rw [not_subsingleton_iff_nontrivial]
+  --need iso
   sorry
