@@ -1,6 +1,7 @@
 import Mathlib.RingTheory.Regular.IsSMulRegular
 import Mathlib.RingTheory.Spectrum.Prime.Defs
 import Mathlib.RingTheory.Support
+import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 variable {R M N : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
 
@@ -27,10 +28,13 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   rw [Module.mem_support_iff] at loc_ne_zero
   let Rₚ := Localization.AtPrime p
   let Nₚ := LocalizedModule p'.asIdeal.primeCompl N
-  have : (⊤ : Submodule R Nₚ) ≠ p'.asIdeal • (⊤ : Submodule R Nₚ) := by
-    let _ : Module.Finite R Nₚ := sorry
+  have : (⊤ : Submodule Rₚ Nₚ) ≠
+    (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Nₚ) := by
     apply Submodule.top_ne_ideal_smul_of_le_jacobson_annihilator
-    sorry
+    exact IsLocalRing.maximalIdeal_le_jacobson (Module.annihilator Rₚ Nₚ)
+  let Nₚ' := Nₚ⧸ (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Nₚ)
+  let _ : Module p.ResidueField Nₚ' := by
 
+    sorry
 
   sorry
