@@ -29,10 +29,24 @@ theorem exists_LTSeries_quotient_cyclic:
     ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ P))
   show P (ModuleCat.of R M)
   apply fg_induction
-  · intro N hN
-    exact ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
+  · exact fun _ _ ↦ ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
       ⟨rfl, ⟨Submodule.eq_bot_of_subsingleton.symm, fun i ↦ Fin.elim0 i⟩⟩⟩
-  · sorry
+  · rintro N ⟨a, hN⟩
+    by_cases htri : Nontrivial (Submodule R N)
+    · refine ⟨⟨1, fun i ↦ match i with | 0 => ⊥ | 1 => ⊤,
+        fun i ↦ match i with | 0 => bot_lt_top⟩, ⟨rfl, ⟨rfl, fun i ↦ ?_⟩⟩⟩
+      match i with
+      | 0 =>
+        refine ⟨Ideal.torsionOf R N a, ⟨?_⟩⟩
+        have equiv : (LinearMap.range (⊤ : Submodule R N).subtype) ≃ₗ[R]
+            R ⧸ (Ideal.torsionOf R N a) := by
+          rw [Submodule.range_subtype, hN]
+          exact (Ideal.quotTorsionOfEquivSpanSingleton R N a).symm
+        exact (LinearMap.quotKerEquivRange
+          <| Submodule.subtype (⊤ : Submodule R N)).trans equiv
+    · exact ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
+      ⟨rfl, ⟨subsingleton_iff_bot_eq_top.2 <|
+        not_nontrivial_iff_subsingleton.1 htri, fun i ↦ Fin.elim0 i⟩⟩⟩
   · rintro M N ⟨pN, hpN1, hpN2, hPN3⟩ ⟨pMN, hpMN1, hpMN2, hpMN3⟩
     let q : M →ₗ[R] M ⧸ N := Submodule.mkQ N
     let pN' : LTSeries (Submodule R M) := (LTSeries.map pN (Submodule.map (Submodule.subtype N))
