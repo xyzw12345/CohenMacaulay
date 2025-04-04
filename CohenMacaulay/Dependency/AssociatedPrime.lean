@@ -19,7 +19,8 @@ theorem exists_LTSeries_quotient_cyclic:
   show P (ModuleCat.of R M)
   apply fg_induction
   · intro N hN
-    sorry
+    exact ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
+      ⟨rfl, ⟨Submodule.eq_bot_of_subsingleton.symm, fun i ↦ Fin.elim0 i⟩⟩⟩
   · sorry
   · rintro M N ⟨pN, hpN1, hpN2, hPN3⟩ ⟨pMN, hpMN1, hpMN2, hpMN3⟩
     let q : M →ₗ[R] M ⧸ N := Submodule.mkQ N
