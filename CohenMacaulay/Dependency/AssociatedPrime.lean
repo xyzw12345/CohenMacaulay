@@ -1,4 +1,5 @@
 import Mathlib
+import «CohenMacaulay».Dependency.StableSES
 
 /-!
 # Missing lemmas in Mathlib of Associated Prime
@@ -19,7 +20,8 @@ theorem exists_LESeries_quotient_iso_quotient_prime :
 theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) (P : Fin p.length → Ideal R) (hP : ∀ (i : Fin p.length), (P i).IsPrime ∧
     Nonempty (((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ (P i)))) :
-    (associatedPrimes R M) ⊆ P '' Set.univ := sorry
+    (associatedPrimes R M) ⊆ P '' Set.univ := by
+  sorry
 
 theorem AssociatedPrimes.finite_of_noetherian [IsNoetherianRing R] : (associatedPrimes R M).Finite := by
   sorry
