@@ -14,6 +14,7 @@ section ModuleCat
 variable {R : Type*} [Ring R]
 
 theorem fg_induction (P : ModuleCat R → Prop) [StableSES P] (h : ∀ I : Ideal R, P (ModuleCat.of R (R ⧸ I)))
-    (M : ModuleCat R) (hM : Module.Finite R M) : P M := sorry
+    (M : ModuleCat R) (hM : Module.Finite R M) : P M := by
+  sorry
 
 end ModuleCat
