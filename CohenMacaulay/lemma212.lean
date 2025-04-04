@@ -24,9 +24,6 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   let p' : PrimeSpectrum R := ⟨p, pass.isPrime⟩
   have : p' ∈ Module.support R N := Module.mem_support_iff_of_finite.mpr hp
   rw [Module.mem_support_iff] at this
-  have :
-
-
 
 
 
