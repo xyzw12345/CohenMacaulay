@@ -137,7 +137,26 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
       simp only [LTSeries.map_length, LTSeries.map_toFun, pMN']
       exact mkQ_equiv ..
   have P_base : ∀ (N : ModuleCat.{v, u} R), (⊤ : Submodule R N).IsPrincipal → P N := by
-    sorry
+    rintro N ⟨a, hN⟩
+    generalize h : Ideal.torsionOf R N a = I
+    induction I using WellFoundedGT.induction generalizing N a
+    rename_i I ih
+    by_cases h_triv : I = ⊤
+    · have : Subsingleton N := by
+        rw [← Submodule.subsingleton_iff R]
+        apply subsingleton_of_bot_eq_top
+        simp_all
+      exact P_zero N this
+    · by_cases h : I.IsPrime
+      · sorry
+      · rw [Ideal.isPrime_iff] at h
+        simp only [ne_eq, h_triv, not_false_eq_true, true_and, not_forall, Classical.not_imp,
+        not_or] at h
+        obtain ⟨x, y, hxy, hx, hy⟩ := h
+        let N' := Submodule.span R {x • a}
+        apply P_ext _ N'
+        · sorry
+        · sorry
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
