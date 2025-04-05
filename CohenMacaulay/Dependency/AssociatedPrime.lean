@@ -338,16 +338,6 @@ theorem exists_LTSeries_quotient_iso_quotient_prime [IsNoetherianRing R] :
             exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-lemma associatedPrimes_of_mono {M : Type*} [AddCommGroup M] [Module R M] (N : Submodule R M) :
-    associatedPrimes R N ⊆ associatedPrimes R M := by
-  intro p ⟨hp, ⟨x, eq⟩⟩
-  constructor
-  · exact hp
-  · use x
-    ext t
-    simp only [eq, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply]
-    exact ⟨fun h ↦ (AddSubmonoid.mk_eq_zero N.toAddSubmonoid).mp h, fun h ↦ Submodule.coe_eq_zero.mp h⟩
-
 lemma AssociatedPrimes.sub_cup_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
     associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) := sorry
