@@ -20,6 +20,18 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
     (h_base : ∀ (N : ModuleCat.{v, u} R), (⊤ : Submodule R N).IsPrincipal → P N)
     (h_ext : ∀ (M : ModuleCat.{v, u} R), ∀ (N : Submodule R M), P (ModuleCat.of R N) → P (ModuleCat.of R (M ⧸ N)) → P M)
     (M : ModuleCat.{v, u} R) (hM : Module.Finite R M) : P M := by
-  sorry
+  have : ∃ (S : Set M.carrier), S.Finite ∧ Submodule.span R S = ⊤ := by
+    apply Module.finite_def.mp at hM
+    exact Submodule.fg_def.mp hM
+  rcases this with ⟨S, Sfin, Sspan⟩
+  have (n : ℕ) : (∃ (S : Set M.carrier), S.Finite ∧ Nat.card S = n ∧ Submodule.span R S = ⊤) → P M := by
+    induction' n with h ih
+    · intro ⟨S, SFin, card, Sspan⟩
+      have : IsEmpty S := by
+        apply (@Finite.card_eq_zero_iff _ SFin).mp card
+      sorry
+    · sorry
+
+
 
 end ModuleCat
