@@ -125,6 +125,7 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
   intro p ⟨hp, ⟨x, eq⟩⟩
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
   have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
+  symm at M'_iso
   rw [← eq, ← hM'] at M'_iso
   by_cases ch : LinearMap.range f ⊓ M'= ⊥
   · set N' := Submodule.map g M' with hN'
@@ -146,35 +147,25 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
     set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
     right
     apply associatedPrimes_subset_of_submodule R N'
-    rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
+    rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  ·
-    set L' := Submodule.comap f M' with hL'
+  · set L' := Submodule.comap f M' with hL'
     set f_iso := Submodule.equivMapOfInjective f finj L' with hf
-    
+    set m_emb : (LinearMap.range f ⊓ M' : Submodule R M) →ₗ[R] M':= Submodule.inclusion inf_le_right
+    have m_emb_inj : Function.Injective m_emb := Submodule.inclusion_injective inf_le_right
     rw [Submodule.map_comap_eq f M'] at *
+    set h := M'_iso.toLinearMap ∘ₗ m_emb ∘ₗ f_iso.toLinearMap with hh
+    have : Function.Injective h := by simpa [hh] using m_emb_inj
+    have : Submodule.map h ⊤ ≠ ⊥ := by
+      sorry
+    left
 
-    have : (LinearMap.range f ⊓ M' : Submodule R M) ≤ M' := by exact inf_le_right
-
-    set h := Submodule.inclusion this
-
-    have : Function.Injective h := by exact Submodule.inclusion_injective this
-
-    set h2 := LinearMap.comp h f_iso.toLinearMap
-
-    symm at M'_iso
-
-    #check M'_iso.toLinearMap
-
-    set h3 := LinearMap.comp M'_iso.toLinearMap h2
-
-    have : Function.Injective h3 := sorry
-
-    #check AssociatedPrimes.ideal_quotient_prime_eq_singleton R p (Submodule.map h3 (⊤))
-
-    #check Submodule.map h3 (⊤)
-
-
+    have := AssociatedPrimes.ideal_quotient_prime_eq_singleton R p (Submodule.map h ⊤) this
+    have : p ∈ associatedPrimes R ↥(Submodule.map h ⊤) := by
+      rw [this, Set.mem_singleton_iff]
+    have : associatedPrimes R (Submodule.map h ⊤) ⊆ associatedPrimes R L := by
+      
+      sorry
 
     sorry
 
