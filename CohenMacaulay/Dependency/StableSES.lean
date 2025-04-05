@@ -24,7 +24,7 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
     apply Module.finite_def.mp at hM
     exact Submodule.fg_def.mp hM
   have (n : ℕ) : ∀ (L : ModuleCat.{v, u} R), (∃ (S : Set L.carrier), S.Finite ∧ Nat.card S ≤ n ∧ Submodule.span R S = ⊤) → P L := by
-    induction' n with n ih
+    obtain _ | n := n
     · intro L ⟨S, SFin, card, Sspan⟩
       have empty : S = ∅ := Set.isEmpty_coe_sort.1 <|
         (@Finite.card_eq_zero_iff _ SFin).1 <| nonpos_iff_eq_zero.1 card
@@ -39,20 +39,48 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
       have h_zero₂ := h_zero (ModuleCat.of R (L.carrier ⧸ (⊤ : Submodule R L))) <|
         Submodule.subsingleton_quotient_iff_eq_top.2 rfl
       exact h_ext L ⊤ h_zero₁ h_zero₂
+    induction' n with n ih
+    · sorry
     · intro L ⟨S, SFin, card_le, Sspan⟩
-      by_cases card_eq : Nat.card S = n + 1
+      by_cases card_eq : Nat.card S = n + 1 + 1
       · rcases Set.eq_insert_of_ncard_eq_succ card_eq with ⟨s, T, sT, ins, Tcard⟩
         have PT : P (ModuleCat.of R (Submodule.span R T)) := by
           refine ih (ModuleCat.of R (Submodule.span R T)) ?_
-          haveI : Fintype T := sorry
+          haveI TFin : T.Finite := by
+            refine Set.finite_of_ncard_ne_zero ?_
+            rw [Tcard]
+            exact (Nat.zero_ne_add_one n).symm
+          haveI : Fintype T := Set.Finite.fintype TFin
           set f : T → Submodule.span R T := fun t : T ↦ by
             use t
             sorry
-          use f '' ⊤
-          sorry
+          refine ⟨Set.range f, Set.finite_range f, ?_⟩
+          constructor
+          · simpa only [← Tcard] using Finite.card_range_le f
+          · have : Set.range f = {t : Submodule.span R T | (t : L) ∈ T} := by
+              ext t
+              constructor <;> intro ht
+              · rcases Subtype.exists.mp <| Set.mem_range.mp ht with ⟨_, b, feq⟩
+                exact Set.mem_of_eq_of_mem (id (Eq.symm feq)) b
+              · exact Set.mem_range.mp <| Subtype.exists.mpr ⟨t, ht, rfl⟩
+            simp only [this, Submodule.span_setOf_mem_eq_top]
         sorry
-      · have card_le : Nat.card S ≤ n := Nat.le_of_lt_succ <| Nat.lt_of_le_of_ne card_le card_eq
+      · have card_le : Nat.card S ≤ n + 1 := Nat.le_of_lt_succ <| Nat.lt_of_le_of_ne card_le card_eq
         exact ih L ⟨S, SFin, card_le, Sspan⟩
   sorry
 
+example {R M : Type*} [Ring R] [AddCommGroup M] [Module R M] (S T : Set M) (a : M)
+  (hins : insert a T = S) (hspan : Submodule.span R S = ⊤) :
+    Submodule.span R {Submodule.Quotient.mk a} =
+      (⊤ : Submodule R (M ⧸ Submodule.span R T)) := by
+  ext x
+  constructor
+  · intro h
+    simp only [Submodule.mem_top]
+  · intro h
+    rw [Submodule.mem_span]
+    intro p hp
+    simp only [Set.singleton_subset_iff, SetLike.mem_coe] at hp
+
+    sorry
 end ModuleCat
