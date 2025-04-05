@@ -138,7 +138,8 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   have : (Module.annihilator R N : Set R) ⊆ ⋃ p ∈ associatedPrimes R M, (p : Set R) := by
     rw [biUnion_associatedPrimes_eq_compl_regular R M]
     exact fun r hr ↦ h r hr
-  have : ∃ p ∈ associatedPrimes R M, (Module.annihilator R N : Set R) ⊆ (p : Set R) := by
+  have : ∃ p ∈ associatedPrimes R M, Module.annihilator R N ≤ p := by
+    #check Ideal.subset_union_prime
     sorry
   rcases this with ⟨p, pass, hp⟩
   let _ := pass.isPrime
