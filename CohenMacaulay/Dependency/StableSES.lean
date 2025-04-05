@@ -15,15 +15,38 @@ universe u v
 
 variable {R : Type u} [Ring R]
 
+lemma span_lemma {M : Type*} [AddCommGroup M] [Module R M] (S T : Set M) (a : M)
+  (hins : insert a T = S) (hspan : Submodule.span R S = ⊤) :
+    Submodule.span R {Submodule.Quotient.mk a} =
+      (⊤ : Submodule R (M ⧸ Submodule.span R T)) := by
+  have := Submodule.span_image (Submodule.mkQ (Submodule.span R T)) (s := S)
+  rw [hspan, Submodule.map_top, Submodule.range_mkQ,
+    ← hins, Set.image_insert_eq] at this
+  have sub_zero : ((Submodule.mkQ (Submodule.span R T)) '' T) ⊆ {0} := by
+    rintro y ⟨hy₁, hy₂⟩
+    rw [← hy₂.2, Submodule.mkQ_apply, Set.mem_singleton_iff,
+      Submodule.Quotient.mk_eq_zero]
+    exact Submodule.mem_span.2 fun _ a ↦ a hy₂.1
+  by_cases hempty : IsEmpty T
+  · replace hempty : T = ∅ := Set.isEmpty_coe_sort.mp hempty
+    rw [hempty] at this ⊢
+    rwa [Set.image_empty, insert_empty_eq] at this
+  · replace sub_zero : ((Submodule.mkQ (Submodule.span R T)) '' T) = {0} := by
+      refine (Set.Nonempty.subset_singleton_iff ?_).mp sub_zero
+      simp only [Submodule.mkQ_apply, Set.image_nonempty]
+      refine Set.nonempty_iff_ne_empty.2 ?_
+      rwa [Set.isEmpty_coe_sort] at hempty
+    rw [← this, sub_zero, Set.pair_comm]
+    exact Submodule.span_insert_zero.symm
+
 theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
     (h_zero : ∀ (N : ModuleCat.{v, u} R), Subsingleton N → P N)
     (h_base : ∀ (N : ModuleCat.{v, u} R), (⊤ : Submodule R N).IsPrincipal → P N)
-    (h_ext : ∀ (M : ModuleCat.{v, u} R), ∀ (N : Submodule R M), P (ModuleCat.of R N) → P (ModuleCat.of R (M ⧸ N)) → P M)
+    (h_ext : ∀ (M : ModuleCat.{v, u} R), ∀ (N : Submodule R M),
+      P (ModuleCat.of R N) → P (ModuleCat.of R (M ⧸ N)) → P M)
     (M : ModuleCat.{v, u} R) (hM : Module.Finite R M) : P M := by
-  have : ∃ (S : Set M.carrier), S.Finite ∧ Submodule.span R S = ⊤ := by
-    apply Module.finite_def.mp at hM
-    exact Submodule.fg_def.mp hM
-  have (n : ℕ) : ∀ (L : ModuleCat.{v, u} R), (∃ (S : Set L.carrier), S.Finite ∧ Nat.card S = n ∧ Submodule.span R S = ⊤) → P L := by
+  have (n : ℕ) : ∀ (L : ModuleCat.{v, u} R), (∃ (S : Set L.carrier),
+      S.Finite ∧ Nat.card S = n ∧ Submodule.span R S = ⊤) → P L := by
     induction' n using Nat.strongRecOn with n ih
     · by_cases n_zero : n = 0
       · intro L ⟨S, SFin, card, Sspan⟩
@@ -31,34 +54,32 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
           (@Finite.card_eq_zero_iff _ SFin).1 <| nonpos_iff_eq_zero.1
             <| by rw [card, n_zero]
         have h_zero_aux : Subsingleton (ModuleCat.of R (⊤ : Submodule R L)) := by
-          refine {allEq a b := ?_}
-          have a_prop := a.2
-          have b_prop := b.2
+          refine {allEq := fun ⟨a, a_prop⟩ ⟨b, b_prop⟩ ↦ ?_}
           simp_rw [← Sspan, empty, Submodule.span_empty, Submodule.mem_bot]
             at a_prop b_prop
-          rwa [← b_prop, SetLike.coe_eq_coe] at a_prop
+          rwa [← b_prop, ← Subtype.mk_eq_mk] at a_prop
         have h_zero₁ := h_zero (ModuleCat.of R (⊤ : Submodule R L)) h_zero_aux
         have h_zero₂ := h_zero (ModuleCat.of R (L.carrier ⧸ (⊤ : Submodule R L))) <|
           Submodule.subsingleton_quotient_iff_eq_top.2 rfl
         exact h_ext L ⊤ h_zero₁ h_zero₂
       · intro L ⟨S, SFin, card_eq, Sspan⟩
-        let m : ℕ := sorry
-        have card_eq' : Nat.card S = m + 1 := sorry
-        have m_le_n : m < n := sorry
-        rcases Set.eq_insert_of_ncard_eq_succ card_eq' with ⟨s, T, sT, ins, Tcard⟩
+        set m : ℕ := n - 1
+        have card_eq : Nat.card S = m + 1 := by
+          simpa only [card_eq] using (Nat.succ_pred_eq_of_ne_zero n_zero).symm
+        rcases Set.eq_insert_of_ncard_eq_succ card_eq with ⟨s, T, sT, ins, Tcard⟩
         have PT : P (ModuleCat.of R (Submodule.span R T)) := by
-          refine ih m m_le_n (ModuleCat.of R (Submodule.span R T)) ?_
-          haveI TFin : T.Finite := by
-            refine Set.finite_of_ncard_ne_zero ?_
-            rw [Tcard]
-            sorry
-          haveI : Fintype T := Set.Finite.fintype TFin
-          set f : T → Submodule.span R T := fun t : T ↦ by
-            use t
-            sorry
+          refine ih m (Nat.sub_one_lt n_zero) (ModuleCat.of R (Submodule.span R T)) ?_
+          haveI : Finite T := Set.Finite.subset SFin (by simp only [← ins, Set.subset_insert])
+          set f : T → Submodule.span R T := fun t : T ↦ ⟨t,
+            Submodule.span_mono (by simp only [Set.singleton_subset_iff, Subtype.coe_prop])
+            (Submodule.mem_span_singleton_self (t : L))⟩
           refine ⟨Set.range f, Set.finite_range f, ?_⟩
           constructor
-          · sorry
+          · have finj : Function.Injective f := by
+              intro x y feq
+              simp only [Subtype.mk.injEq, f] at feq
+              exact SetCoe.ext feq
+            simpa only [Nat.card_range_of_injective finj] using Tcard
           · have : Set.range f = {t : Submodule.span R T | (t : L) ∈ T} := by
               ext t
               constructor <;> intro ht
@@ -66,21 +87,12 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
                 exact Set.mem_of_eq_of_mem (id (Eq.symm feq)) b
               · exact Set.mem_range.mp <| Subtype.exists.mpr ⟨t, ht, rfl⟩
             simp only [this, Submodule.span_setOf_mem_eq_top]
-        sorry
-  sorry
+        have P1 : P (ModuleCat.of R (L ⧸ Submodule.span R T)) := by
+          refine h_base (ModuleCat.of R (L ⧸ Submodule.span R T)) ?_
+          simp only [← span_lemma S T s ins Sspan]
+          exact (Submodule.isPrincipal_iff _).mpr ⟨Submodule.Quotient.mk s, rfl⟩
+        exact h_ext L (Submodule.span R T) PT P1
+  rcases Submodule.fg_def.mp (Module.finite_def.mp hM) with ⟨S, SFin, Sspan⟩
+  exact this (Nat.card S) M ⟨S, SFin, rfl, Sspan⟩
 
-example {R M : Type*} [Ring R] [AddCommGroup M] [Module R M] (S T : Set M) (a : M)
-  (hins : insert a T = S) (hspan : Submodule.span R S = ⊤) :
-    Submodule.span R {Submodule.Quotient.mk a} =
-      (⊤ : Submodule R (M ⧸ Submodule.span R T)) := by
-  ext x
-  constructor
-  · intro h
-    simp only [Submodule.mem_top]
-  · intro h
-    rw [Submodule.mem_span]
-    intro p hp
-    simp only [Set.singleton_subset_iff, SetLike.mem_coe] at hp
-
-    sorry
 end ModuleCat
