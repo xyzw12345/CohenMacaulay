@@ -133,52 +133,25 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
     (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
   intro p ⟨hp, ⟨x, eq⟩⟩
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
-  have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
-  symm at M'_iso
-  rw [← eq, ← hM'] at M'_iso
+  have hx (y : R) : y • x = 0 ↔ y ∈ p := by simp [eq]
   by_cases ch : LinearMap.range f ⊓ M'= ⊥
-  · set N' := Submodule.map g M' with hN'
-    set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
-    have : Function.Bijective g_restrict := by
-      constructor
-      · intro a b heq
-        have (x : M'): g (x : M) = g_restrict x := rfl
-        have : g (a : M) = g (b : M) := by rw [this, this, heq]
-        rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
-        have : (a - b : M) ∈ LinearMap.range f ⊓ M' :=
-          ⟨this, sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b)⟩
-        rw [ch, Submodule.mem_bot] at this
-        rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
-      · intro y₀
-        obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
-        use ⟨x₀, x₀in⟩
-        exact SetLike.coe_eq_coe.mp hx₀
-    set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
-    right
-    apply associatedPrimes_subset_of_submodule R N'
-    rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso),
-      AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  · set L' := Submodule.comap f M' with hL'
-    set f_iso := Submodule.equivMapOfInjective f finj L' with hf
-    set m_emb : (LinearMap.range f ⊓ M' : Submodule R M) →ₗ[R] M':= Submodule.inclusion inf_le_right
-    have m_emb_inj : Function.Injective m_emb := Submodule.inclusion_injective inf_le_right
-    rw [Submodule.map_comap_eq f M'] at *
-    set h := M'_iso.toLinearMap ∘ₗ m_emb ∘ₗ f_iso.toLinearMap with hh
-    have : Function.Injective h := by simpa [hh] using m_emb_inj
-    have : Submodule.map h ⊤ ≠ ⊥ := by
-      sorry
-    left
-
-    have := AssociatedPrimes.ideal_quotient_prime_eq_singleton R p (Submodule.map h ⊤) this
-    have : p ∈ associatedPrimes R ↥(Submodule.map h ⊤) := by
-      rw [this, Set.mem_singleton_iff]
-    have : associatedPrimes R (Submodule.map h ⊤) ⊆ associatedPrimes R L := by
-      
-      sorry
-
-    sorry
-
-
+  · refine Or.inr ⟨hp, g x, ?_⟩
+    ext y
+    rw [LinearMap.mem_ker, LinearMap.toSpanSingleton_apply, ← map_smul, hexact (y • x),
+      ← hx y, ← Submodule.mem_bot R, ← ch, Submodule.mem_inf]
+    simp [hM']
+  · obtain ⟨y, hy⟩ : ∃ y : L, f y ∈ M' ∧ f y ≠ 0 := by
+      obtain ⟨_, ⟨⟨y, rfl⟩, hz2⟩, hz3⟩ : ∃ z : M, (z ∈ LinearMap.range f ⊓ M') ∧ z ≠ 0 :=
+        Submodule.exists_mem_ne_zero_of_ne_bot ch
+      exact ⟨y, ⟨hz2, hz3⟩⟩
+    refine Or.inl ⟨hp, y, ?_⟩
+    ext r
+    simp only [LinearMap.mem_ker, LinearMap.toSpanSingleton_apply]
+    rw [← finj.eq_iff (a := (r • y)) (b := 0), map_zero, map_smul]
+    obtain ⟨z, hz⟩ : ∃ z : R, z • x = f y := hy.1
+    have hzne : z ∉ p := fun h ↦ (by rw [(hx z).mpr h] at hz; exact hy.2 hz.symm)
+    rw [← hz, smul_smul, hx]
+    exact ⟨fun h ↦ Ideal.IsTwoSided.mul_mem_of_left z h, fun h ↦ by simpa [hzne] using (Ideal.IsPrime.mem_or_mem hp h)⟩
 
 lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
