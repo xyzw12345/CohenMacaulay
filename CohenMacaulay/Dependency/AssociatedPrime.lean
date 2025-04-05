@@ -338,21 +338,6 @@ theorem exists_LTSeries_quotient_iso_quotient_prime [IsNoetherianRing R] :
             exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-lemma AssociatedPrimes.sub_cup_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
-    associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) := sorry
-
-lemma AssociatedPrimes.sub_cup_quotient {M : Type*} [AddCommGroup M] [Module R M]
-    (p q : Submodule R M) (hpq : p < q) :
-    (associatedPrimes R q) ⊆ (associatedPrimes R p) ∪
-    (associatedPrimes R (q ⧸ (Submodule.comap q.subtype p))) := by sorry
-
-lemma AssociatedPrimes.sub_iUnion_quotient (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
-    (h_last : p.last = ⊤) :
-    associatedPrimes R M ⊆ ⋃ i : Fin p.length,
-    associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) :=
-  sorry
-
 theorem AssociatedPrimes.finite_of_noetherian [IsNoetherianRing R] : (associatedPrimes R M).Finite := by
   obtain ⟨p, h_head, h_tail, h⟩:= exists_LTSeries_quotient_iso_quotient_prime R M
   choose P h1 h2 using h
