@@ -114,7 +114,7 @@ end mono
 
 section extension
 
-lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
+lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
     [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
     (finj : Function.Injective f) (hexact : Function.Exact f g) :
     (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
@@ -143,12 +143,12 @@ lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L
     apply associatedPrimes_subset_of_submodule R N'
     rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  · 
-    sorry
+  · sorry
 
 lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
-    associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) := sorry
+    associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) :=
+  associatedPrimes_subset_union_of_exact R f ((Submodule.map f ⊤).mkQ) hinj (by simp [LinearMap.exact_iff])
 
 lemma AssociatedPrimes.subset_union_quotient {M : Type*} [AddCommGroup M] [Module R M]
     (p q : Submodule R M) (hpq : p < q) :
