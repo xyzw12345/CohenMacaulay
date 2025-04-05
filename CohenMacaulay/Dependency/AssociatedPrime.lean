@@ -68,16 +68,20 @@ end helper
 section calculation
 
 open LinearMap in
-lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime] :
-    associatedPrimes R (R ⧸ p) = {p} := by
-  have h0 : ker (toSpanSingleton R (R ⧸ p) 0) = ⊤ := by simp
-  have h1 (x : R ⧸ p) (h : x ≠ 0) : ker (toSpanSingleton R (R ⧸ p) x) = p := by
-    obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+lemma AssociatedPrimes.ideal_quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime]
+    (q : Submodule R (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := by
+  have h0 : ker (toSpanSingleton R q 0) = ⊤ := by simp
+  have h1 (x : q) (h : x ≠ 0) : ker (toSpanSingleton R q x) = p := by
+    obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective x.1
     ext y
     simp only [mem_ker, toSpanSingleton, smulRight, id_apply]
-    show (Ideal.Quotient.mk p (y * x)) = 0 ↔ y ∈ p
+    show y • x = 0 ↔ y ∈ p
+    rw [show y • x = 0 ↔ (y • x).1 = 0 from Iff.symm Submodule.coe_eq_zero,
+      show (y • x).1 = y • x.1 from rfl, ← hz]
+    show (Ideal.Quotient.mk p (y * z)) = 0 ↔ y ∈ p
     simp only [ne_eq, Ideal.Quotient.eq_zero_iff_mem] at h ⊢
-    exact ⟨fun h' ↦ by simpa [h] using (hp.mem_or_mem h'), fun h ↦ Ideal.IsTwoSided.mul_mem_of_left x h⟩
+    have : z ∉ p := by rw [← Ideal.Quotient.eq_zero_iff_mem, hz, Submodule.coe_eq_zero]; exact h
+    exact ⟨fun h' ↦ by simpa [this] using (hp.mem_or_mem h'), fun h ↦ Ideal.IsTwoSided.mul_mem_of_left z h⟩
   ext y
   simp only [associatedPrimes, IsAssociatedPrime, Set.mem_setOf_eq, Set.mem_singleton_iff]
   constructor
@@ -86,11 +90,16 @@ lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime
     · simp_rw [h, h0] at hx
       exact False.elim (hy.1 hx)
     · exact hx.trans (h1 x h)
-  · obtain ⟨x, hx⟩ : ∃ x : R ⧸ p, x ≠ 0 := exists_ne 0
+  · obtain ⟨x, hx⟩ : ∃ x : q, x ≠ 0 :=
+      Submodule.nonzero_mem_of_bot_lt <| Ne.bot_lt' (Ne.symm hq)
     exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
 
-lemma AssociatedPrimes.ideal_quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime]
-    (q : Submodule R (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := sorry
+open LinearMap in
+lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime] :
+    associatedPrimes R (R ⧸ p) = {p} := by
+  rw [LinearEquiv.AssociatedPrimes.eq Submodule.topEquiv.symm]
+  apply AssociatedPrimes.ideal_quotient_prime_eq_singleton
+  simp
 
 end calculation
 
