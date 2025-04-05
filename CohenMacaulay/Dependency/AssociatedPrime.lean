@@ -89,7 +89,7 @@ lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime
     exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
 
 lemma AssociatedPrimes.ideal_quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime]
-    (q : Ideal (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := sorry
+    (q : Submodule R (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := sorry
 
 end calculation
 
@@ -150,36 +150,34 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
   ·
     set L' := Submodule.comap f M' with hL'
     set f_iso := Submodule.equivMapOfInjective f finj L' with hf
-    obtain ⟨x', xin, neq⟩ := by
-      have : L' ≠ ⊥ := by
-        by_contra nh
-        rw [nh] at hL'
-        have : ⊥ = Submodule.map f (Submodule.comap f M') := by simp [← hL']
-        rw [Submodule.map_comap_eq f M'] at this
-        symm at this
-        contradiction
-      rw [Submodule.ne_bot_iff] at this
-      exact this
-    left
-
+    
     rw [Submodule.map_comap_eq f M'] at *
 
-    have : ∃ h : (LinearMap.range f ⊓ M' : Submodule R M) →ₗ[R] M', Function.Injective h := by
-      sorry
+    have : (LinearMap.range f ⊓ M' : Submodule R M) ≤ M' := by exact inf_le_right
 
-    -- have : L' ≃ₗ[R] (LinearMap.range f ⊓ M') := by
-      -- refine Submodule.comap_equiv_self_of_inj_of_le finj ?_
+    set h := Submodule.inclusion this
 
-      -- sorry
+    have : Function.Injective h := by exact Submodule.inclusion_injective this
 
-    constructor
-    · exact hp
-    · use x'
-      rw [eq]
-      ext t
-      simp
+    set h2 := LinearMap.comp h f_iso.toLinearMap
 
-      sorry
+    symm at M'_iso
+
+    #check M'_iso.toLinearMap
+
+    set h3 := LinearMap.comp M'_iso.toLinearMap h2
+
+    have : Function.Injective h3 := sorry
+
+    #check AssociatedPrimes.ideal_quotient_prime_eq_singleton R p (Submodule.map h3 (⊤))
+
+    #check Submodule.map h3 (⊤)
+
+
+
+    sorry
+
+
 
 lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
