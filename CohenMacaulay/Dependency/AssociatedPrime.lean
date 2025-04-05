@@ -74,9 +74,26 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
   apply fg_induction
   · exact fun _ _ ↦ ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
       ⟨rfl, ⟨Submodule.eq_bot_of_subsingleton.symm, fun i ↦ Fin.elim0 i⟩⟩⟩
-  · sorry
+  ·
+    sorry
   · sorry
   · infer_instance
+
+lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
+    [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
+    (hexact : Function.Exact f g) : (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
+  intro p ⟨hp, ⟨x, eq⟩⟩
+  set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
+  have := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
+  rw [← eq, ← hM'] at this
+  -- #check LinearMap.range f
+  by_cases ch : M' ⊓ LinearMap.range f = ⊥
+  ·
+    -- #check Submodule.subtype M'
+    -- set N' :=
+    sorry
+  · sorry
+
 
 theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) (P : Fin p.length → Ideal R) (hP : ∀ (i : Fin p.length), (P i).IsPrime ∧
