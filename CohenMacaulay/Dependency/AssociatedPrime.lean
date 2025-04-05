@@ -89,7 +89,7 @@ lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime
     exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
 
 lemma AssociatedPrimes.ideal_quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime]
-    (q : Ideal (R ⧸ p)) : associatedPrimes R q = {p} := sorry
+    (q : Ideal (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := sorry
 
 end calculation
 
