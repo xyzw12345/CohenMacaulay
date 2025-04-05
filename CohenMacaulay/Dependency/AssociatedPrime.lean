@@ -159,13 +159,28 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
         · sorry
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
+lemma associatedPrimes_of_mono {M : Type*} [AddCommGroup M] [Module R M] (N : Submodule R M) :
+    associatedPrimes R N ⊆ associatedPrimes R M := by
+  intro p ⟨hp, ⟨x, eq⟩⟩
+  constructor
+  · exact hp
+  · use x
+    ext t
+    simp only [eq, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply]
+    exact ⟨fun h ↦ (AddSubmonoid.mk_eq_zero N.toAddSubmonoid).mp h, fun h ↦ Submodule.coe_eq_zero.mp h⟩
+
+lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime] :
+    associatedPrimes R (R ⧸ p) = {p} := by
+  rw [associatedPrimes.eq_singleton_of_isPrimary (Ideal.IsPrime.isPrimary hp),
+    Ideal.IsPrime.radical hp]
+
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
     [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
     (hexact : Function.Exact f g) : (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
   intro p ⟨hp, ⟨x, eq⟩⟩
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
-  have := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
-  rw [← eq, ← hM'] at this
+  have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
+  rw [← eq, ← hM'] at M'_iso
   by_cases ch : M' ⊓ LinearMap.range f = ⊥
   · set N' := Submodule.map g M' with hN'
     set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
@@ -182,8 +197,13 @@ lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L
         obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
         use ⟨x₀, x₀in⟩
         exact SetLike.coe_eq_coe.mp hx₀
-    sorry
+    set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
+    right
+    apply associatedPrimes_of_mono R N'
+    rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
+      AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
   · sorry
+
 
 lemma AssociatedPrimes.sub_cup_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
@@ -200,8 +220,7 @@ lemma AssociatedPrimes.sub_iUnion_quotient (p : LTSeries (Submodule R M)) (h_hea
     associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) :=
   sorry
 
-lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [p.IsPrime] :
-    associatedPrimes R (R ⧸ p) = {p} := sorry
+
 
 theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) (P : Fin p.length → Ideal R)
