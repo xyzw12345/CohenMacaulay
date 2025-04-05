@@ -166,11 +166,22 @@ lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
   have := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
   rw [← eq, ← hM'] at this
-  -- #check LinearMap.range f
   by_cases ch : M' ⊓ LinearMap.range f = ⊥
-  ·
-    -- #check Submodule.subtype M'
-    -- set N' :=
+  · set N' := Submodule.map g M' with hN'
+    set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
+    have : Function.Bijective g_restrict := by
+      constructor
+      · intro a b heq
+        have (x : M'): g (x : M) = g_restrict x := rfl
+        have : g (a : M) = g (b : M) := by rw [this, this, heq]
+        rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
+        have : (a - b : M) ∈ M' ⊓ LinearMap.range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
+        rw [ch, Submodule.mem_bot] at this
+        rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
+      · intro y₀
+        obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
+        use ⟨x₀, x₀in⟩
+        exact SetLike.coe_eq_coe.mp hx₀
     sorry
   · sorry
 
