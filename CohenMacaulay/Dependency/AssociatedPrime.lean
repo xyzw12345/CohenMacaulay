@@ -229,35 +229,69 @@ lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime
   rw [associatedPrimes.eq_singleton_of_isPrimary (Ideal.IsPrime.isPrimary hp),
     Ideal.IsPrime.radical hp]
 
+open LinearMap in
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
     [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
-    (hexact : Function.Exact f g) : (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
+    (finj : Function.Injective f) (hexact : Function.Exact f g) :
+    (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
   intro p ⟨hp, ⟨x, eq⟩⟩
-  set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
-  have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
+  set M' := range (toSpanSingleton R M x) with hM'
+  have M'_iso := quotKerEquivRange (toSpanSingleton R M x)
   rw [← eq, ← hM'] at M'_iso
-  by_cases ch : M' ⊓ LinearMap.range f = ⊥
+  by_cases ch : M' ⊓ range f = ⊥
   · set N' := Submodule.map g M' with hN'
-    set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
-    have : Function.Bijective g_restrict := by
+    set g_iso : M' ≃ₗ[R] N' := by
+      apply LinearEquiv.ofBijective (restrict g (fun x a ↦ Submodule.mem_map_of_mem a))
       constructor
       · intro a b heq
+        set g_restrict : M' →ₗ[R] N' := restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
         have (x : M'): g (x : M) = g_restrict x := rfl
         have : g (a : M) = g (b : M) := by rw [this, this, heq]
-        rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
-        have : (a - b : M) ∈ M' ⊓ LinearMap.range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
+        rw [← sub_eq_zero, ← map_sub, hexact] at this
+        have : (a - b : M) ∈ M' ⊓ range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
         rw [ch, Submodule.mem_bot] at this
         rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
       · intro y₀
         obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
         use ⟨x₀, x₀in⟩
         exact SetLike.coe_eq_coe.mp hx₀
-    set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
     right
     apply associatedPrimes_of_mono R N'
     rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  · sorry
+  · obtain ⟨x₀, neq, x₀in, ⟨y₀, hy⟩⟩ : ∃ x ≠ 0, x ∈ M' ⊓ range f := by
+      by_contra nh
+      push_neg at nh
+      have : M' ⊓ range f = ⊥ := (Submodule.eq_bot_iff (M' ⊓ range f)).mpr
+        (fun x hx ↦ Set.not_mem_compl_iff.mp fun a ↦ nh x a hx)
+      contradiction
+    left
+    constructor
+    · exact hp
+    ·
+      use y₀
+      rw [eq]
+      ext t
+      simp
+      rw [← hy] at neq x₀in
+      clear hy
+      simp [hM'] at x₀in
+      obtain ⟨y, hy⟩ := x₀in
+      constructor
+      · intro h
+
+        have : f (t • y₀) = 0 := by
+          simp [← hy]
+          have : t • y • x = y • (t • x) := by
+            exact smul_comm t y x
+          rw [this, h]
+          simp
+        have : f (t • y₀) = f 0 := by
+          simp [this]
+        exact finj this
+      · intro h
+        
+        sorry
 
 
 lemma AssociatedPrimes.sub_cup_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
