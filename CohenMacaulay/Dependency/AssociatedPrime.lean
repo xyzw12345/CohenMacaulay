@@ -1,4 +1,5 @@
 import Mathlib
+import «CohenMacaulay».FromPR.RelSeries
 import «CohenMacaulay».Dependency.StableSES
 
 /-!
@@ -199,7 +200,36 @@ section chain
 lemma AssociatedPrimes.subset_iUnion_quotient (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) : associatedPrimes R M ⊆ ⋃ i : Fin p.length,
     associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) := by
-  sorry
+  rw [← LinearEquiv.AssociatedPrimes.eq (Submodule.topEquiv), ← h_last]
+  clear h_last
+  induction p using RelSeries.inductionOn'
+  case singleton N =>
+    simp only [RelSeries.head_singleton] at h_head
+    simp only [RelSeries.singleton_length, RelSeries.singleton_toFun, Set.iUnion_of_empty,
+      Set.subset_empty_iff]
+    erw [RelSeries.last_singleton, h_head]
+    apply associatedPrimes.eq_empty_of_subsingleton
+  case snoc p N hN ih =>
+    simp only [RelSeries.head_snoc] at h_head
+    specialize ih h_head
+    rw [RelSeries.last_snoc]
+    apply Set.Subset.trans (AssociatedPrimes.subset_union_quotient R p.last N (le_of_lt hN))
+    apply Set.Subset.trans (Set.union_subset_union_left _ ih)
+    intro x hx
+    simp only [Set.mem_union, Set.mem_iUnion, RelSeries.snoc_length] at hx ⊢
+    rcases hx with (⟨i, hx⟩ | hx)
+    · refine ⟨i.castSucc, ?_⟩
+      rw [Fin.succ_castSucc, RelSeries.snoc_castSucc p N hN i.succ, RelSeries.snoc_castSucc p N hN i.castSucc]
+      exact hx
+    · refine ⟨Fin.last _, ?_⟩
+      have : (p.snoc N hN).toFun (Fin.last p.length).castSucc = p.last := by
+        simp only [RelSeries.snoc, RelSeries.append, RelSeries.singleton_length, Nat.add_zero,
+          Nat.reduceAdd, show (Fin.last p.length).castSucc = (Fin.last p.length).castAdd 1 from rfl,
+          Fin.cast_refl, Function.comp_apply, id_eq, Fin.append_left]
+        rfl
+      simp only [Fin.succ_last, Nat.succ_eq_add_one]
+      rw [RelSeries.last_snoc', this]
+      exact hx
 
 theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) (P : Fin p.length → Ideal R) (hPprime : ∀ (i : Fin p.length), (P i).IsPrime)
