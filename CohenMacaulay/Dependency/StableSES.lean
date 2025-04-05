@@ -46,20 +46,24 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
       · rcases Set.eq_insert_of_ncard_eq_succ card_eq with ⟨s, T, sT, ins, Tcard⟩
         have PT : P (ModuleCat.of R (Submodule.span R T)) := by
           refine ih (ModuleCat.of R (Submodule.span R T)) ?_
-          haveI : Fintype T := sorry
+          haveI TFin : T.Finite := by
+            refine Set.finite_of_ncard_ne_zero ?_
+            rw [Tcard]
+            exact (Nat.zero_ne_add_one n).symm
+          haveI : Fintype T := Set.Finite.fintype TFin
           set f : T → Submodule.span R T := fun t : T ↦ by
             use t
             sorry
-          use f '' ⊤
-          sorry
-        have PT' : P (ModuleCat.of R (L ⧸ (Submodule.span R T))) := by
-          refine ih _ ⟨{⟦s⟧}, ?_⟩
+          refine ⟨Set.range f, Set.finite_range f, ?_⟩
           constructor
-          · simp only [Set.finite_singleton]
-          · constructor
-            · simp only [Nat.card_eq_fintype_card, Fintype.card_unique]
-              sorry
-            · sorry
+          · simpa only [← Tcard] using Finite.card_range_le f
+          · have : Set.range f = {t : Submodule.span R T | (t : L) ∈ T} := by
+              ext t
+              constructor <;> intro ht
+              · rcases Subtype.exists.mp <| Set.mem_range.mp ht with ⟨_, b, feq⟩
+                exact Set.mem_of_eq_of_mem (id (Eq.symm feq)) b
+              · exact Set.mem_range.mp <| Subtype.exists.mpr ⟨t, ht, rfl⟩
+            simp only [this, Submodule.span_setOf_mem_eq_top]
         sorry
       · have card_le : Nat.card S ≤ n + 1 := Nat.le_of_lt_succ <| Nat.lt_of_le_of_ne card_le card_eq
         exact ih L ⟨S, SFin, card_le, Sspan⟩
