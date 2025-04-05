@@ -89,6 +89,9 @@ lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime
   · obtain ⟨x, hx⟩ : ∃ x : R ⧸ p, x ≠ 0 := exists_ne 0
     exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
 
+lemma AssociatedPrimes.ideal_quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime]
+    (q : Ideal (R ⧸ p)) (hq : q ≠ ⊥) : associatedPrimes R q = {p} := sorry
+
 end calculation
 
 section mono
@@ -123,7 +126,7 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
   have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
   rw [← eq, ← hM'] at M'_iso
-  by_cases ch : M' ⊓ LinearMap.range f = ⊥
+  by_cases ch : LinearMap.range f ⊓ M'= ⊥
   · set N' := Submodule.map g M' with hN'
     set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
     have : Function.Bijective g_restrict := by
@@ -132,7 +135,8 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
         have (x : M'): g (x : M) = g_restrict x := rfl
         have : g (a : M) = g (b : M) := by rw [this, this, heq]
         rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
-        have : (a - b : M) ∈ M' ⊓ LinearMap.range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
+        have : (a - b : M) ∈ LinearMap.range f ⊓ M' :=
+          ⟨this, sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b)⟩
         rw [ch, Submodule.mem_bot] at this
         rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
       · intro y₀
@@ -144,7 +148,39 @@ lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [Ad
     apply associatedPrimes_subset_of_submodule R N'
     rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  · sorry
+  ·
+    set L' := Submodule.comap f M' with hL'
+    set f_iso := Submodule.equivMapOfInjective f finj L' with hf
+    obtain ⟨x', xin, neq⟩ := by
+      have : L' ≠ ⊥ := by
+        by_contra nh
+        rw [nh] at hL'
+        have : ⊥ = Submodule.map f (Submodule.comap f M') := by simp [← hL']
+        rw [Submodule.map_comap_eq f M'] at this
+        symm at this
+        contradiction
+      rw [Submodule.ne_bot_iff] at this
+      exact this
+    left
+
+    rw [Submodule.map_comap_eq f M'] at *
+
+    have : ∃ h : (LinearMap.range f ⊓ M' : Submodule R M) →ₗ[R] M', Function.Injective h := by
+      sorry
+
+    -- have : L' ≃ₗ[R] (LinearMap.range f ⊓ M') := by
+      -- refine Submodule.comap_equiv_self_of_inj_of_le finj ?_
+
+      -- sorry
+
+    constructor
+    · exact hp
+    · use x'
+      rw [eq]
+      ext t
+      simp
+
+      sorry
 
 lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
