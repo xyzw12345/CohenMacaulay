@@ -151,8 +151,12 @@ lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] 
   associatedPrimes_subset_union_of_exact R f ((Submodule.map f ⊤).mkQ) hinj (by simp [LinearMap.exact_iff])
 
 lemma AssociatedPrimes.subset_union_quotient {M : Type*} [AddCommGroup M] [Module R M]
-    (p q : Submodule R M) (hpq : p < q) :
-    (associatedPrimes R q) ⊆ (associatedPrimes R p) ∪ (associatedPrimes R (q ⧸ (Submodule.comap q.subtype p))) := by sorry
+    (p q : Submodule R M) (hpq : p ≤ q) :
+    (associatedPrimes R q) ⊆ (associatedPrimes R p) ∪ (associatedPrimes R (q ⧸ (Submodule.comap q.subtype p))) := by
+  apply associatedPrimes_subset_union_of_exact R (Submodule.inclusion hpq) (Submodule.comap q.subtype p).mkQ
+  · exact Submodule.inclusion_injective hpq
+  · simp only [LinearMap.exact_iff, Submodule.ker_mkQ]
+    exact (Submodule.range_inclusion p q hpq).symm
 
 end extension
 
