@@ -26,9 +26,8 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
   have (n : ℕ) : ∀ (L : ModuleCat.{v, u} R), (∃ (S : Set L.carrier), S.Finite ∧ Nat.card S ≤ n ∧ Submodule.span R S = ⊤) → P L := by
     induction' n with h ih
     · intro L ⟨S, SFin, card, Sspan⟩
-      rw [nonpos_iff_eq_zero] at card
       have empty : S = ∅ := Set.isEmpty_coe_sort.1 <|
-        (@Finite.card_eq_zero_iff _ SFin).1 card
+        (@Finite.card_eq_zero_iff _ SFin).1 <| nonpos_iff_eq_zero.1 card
       have h_zero_aux : Subsingleton (ModuleCat.of R (⊤ : Submodule R L)) := by
         refine {allEq a b := ?_}
         have a_prop := a.2
