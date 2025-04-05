@@ -6,7 +6,7 @@ import «CohenMacaulay».Dependency.StableSES
 -/
 
 universe u v
-variable (R : Type u) (M : Type v) [CommRing R] [AddCommGroup M] [Module R M] [Module.Finite R M]
+variable (R : Type u) (M : Type v) [CommRing R] [AddCommGroup M] [Module R M]
 
 section helper
 
@@ -64,6 +64,138 @@ noncomputable def mkQ_equiv (N1 N2 : Submodule R (M ⧸ N)) : ((Submodule.comap 
 
 end helper
 
+section calculation
+
+open LinearMap in
+lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime] :
+    associatedPrimes R (R ⧸ p) = {p} := by
+  have h0 : ker (toSpanSingleton R (R ⧸ p) 0) = ⊤ := by simp
+  have h1 (x : R ⧸ p) (h : x ≠ 0) : ker (toSpanSingleton R (R ⧸ p) x) = p := by
+    obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+    ext y
+    simp only [mem_ker, toSpanSingleton, smulRight, id_apply]
+    show (Ideal.Quotient.mk p (y * x)) = 0 ↔ y ∈ p
+    simp only [ne_eq, Ideal.Quotient.eq_zero_iff_mem] at h ⊢
+    exact ⟨fun h' ↦ by simpa [h] using (hp.mem_or_mem h'), fun h ↦ Ideal.IsTwoSided.mul_mem_of_left x h⟩
+  ext y
+  simp only [associatedPrimes, IsAssociatedPrime, Set.mem_setOf_eq, Set.mem_singleton_iff]
+  constructor
+  · rintro ⟨hy, ⟨x, hx⟩⟩
+    by_cases h : x = 0
+    · simp_rw [h, h0] at hx
+      exact False.elim (hy.1 hx)
+    · exact hx.trans (h1 x h)
+  · obtain ⟨x, hx⟩ : ∃ x : R ⧸ p, x ≠ 0 := exists_ne 0
+    exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
+
+end calculation
+
+section mono
+
+lemma associatedPrimes_mono {M : Type*} [AddCommGroup M] [Module R M] (N1 N2 : Submodule R M) (h : N1 ≤ N2):
+    associatedPrimes R N1 ⊆ associatedPrimes R N2 := by
+  intro p ⟨hp, ⟨x, eq⟩⟩
+  constructor
+  · exact hp
+  · use ⟨x.1, h x.2⟩
+    ext t
+    simp only [eq, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply]
+    exact ⟨fun h' ↦ Subtype.ext <| (AddSubmonoid.mk_eq_zero N1.toAddSubmonoid).mp h',
+      fun h ↦ Submodule.coe_eq_zero.mp congr($h.1)⟩
+
+lemma associatedPrimes_subset_of_submodule {M : Type*} [AddCommGroup M] [Module R M] (N : Submodule R M) :
+    associatedPrimes R N ⊆ associatedPrimes R M := by
+  have : associatedPrimes R M = associatedPrimes R (⊤ : Submodule R M) :=
+    LinearEquiv.AssociatedPrimes.eq Submodule.topEquiv.symm
+  rw [this]
+  apply associatedPrimes_mono R N ⊤ (fun {x} a ↦ trivial)
+
+end mono
+
+section extension
+
+lemma associatedPrimes_subset_union_of_exact {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
+    [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
+    (finj : Function.Injective f) (hexact : Function.Exact f g) :
+    (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
+  intro p ⟨hp, ⟨x, eq⟩⟩
+  set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
+  have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
+  rw [← eq, ← hM'] at M'_iso
+  by_cases ch : M' ⊓ LinearMap.range f = ⊥
+  · set N' := Submodule.map g M' with hN'
+    set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
+    have : Function.Bijective g_restrict := by
+      constructor
+      · intro a b heq
+        have (x : M'): g (x : M) = g_restrict x := rfl
+        have : g (a : M) = g (b : M) := by rw [this, this, heq]
+        rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
+        have : (a - b : M) ∈ M' ⊓ LinearMap.range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
+        rw [ch, Submodule.mem_bot] at this
+        rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
+      · intro y₀
+        obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
+        use ⟨x₀, x₀in⟩
+        exact SetLike.coe_eq_coe.mp hx₀
+    set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
+    right
+    apply associatedPrimes_subset_of_submodule R N'
+    rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
+      AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
+  · sorry
+
+lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
+    associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) :=
+  associatedPrimes_subset_union_of_exact R f ((Submodule.map f ⊤).mkQ) hinj (by simp [LinearMap.exact_iff])
+
+lemma AssociatedPrimes.subset_union_quotient {M : Type*} [AddCommGroup M] [Module R M]
+    (p q : Submodule R M) (hpq : p ≤ q) :
+    (associatedPrimes R q) ⊆ (associatedPrimes R p) ∪ (associatedPrimes R (q ⧸ (Submodule.comap q.subtype p))) := by
+  apply associatedPrimes_subset_union_of_exact R (Submodule.inclusion hpq) (Submodule.comap q.subtype p).mkQ
+  · exact Submodule.inclusion_injective hpq
+  · simp only [LinearMap.exact_iff, Submodule.ker_mkQ]
+    exact (Submodule.range_inclusion p q hpq).symm
+
+end extension
+
+section chain
+
+lemma AssociatedPrimes.subset_iUnion_quotient (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
+    (h_last : p.last = ⊤) : associatedPrimes R M ⊆ ⋃ i : Fin p.length,
+    associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) := by
+  sorry
+
+theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
+    (h_last : p.last = ⊤) (P : Fin p.length → Ideal R) (hPprime : ∀ (i : Fin p.length), (P i).IsPrime)
+    (hP : ∀ (i : Fin p.length), Nonempty
+      (((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ (P i)))) :
+    (associatedPrimes R M) ⊆ P '' Set.univ := by
+  have heq1 : ∀ (i : Fin p.length), associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) = associatedPrimes R (R ⧸ (P i)) := by
+    intro i
+    let e := Classical.choice (hP i)
+    exact LinearEquiv.AssociatedPrimes.eq e
+  have heq1' := Set.iUnion_congr heq1
+  have heq2 : ∀ (i : Fin p.length), associatedPrimes R (R ⧸ (P i)) = {P i} := by
+    intro i
+    exact AssociatedPrimes.quotient_prime_eq_singleton R _
+  have heq2' := Set.iUnion_congr heq2
+  have hmem : ⋃ i : Fin p.length, {P i} ⊆ P '' Set.univ := by
+    rw[Set.iUnion_subset_iff]
+    intro i
+    rw [Set.image_univ, Set.singleton_subset_iff, Set.mem_range]
+    use i
+  apply subset_trans (AssociatedPrimes.subset_iUnion_quotient _ _ p h_head h_last)
+  rw [heq1', heq2']
+  exact hmem
+
+end chain
+
+section noetherian
+
+variable [Module.Finite R M]
+
 -- [Stacks 00KZ]
 theorem exists_LTSeries_quotient_cyclic:
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
@@ -97,7 +229,8 @@ theorem exists_LTSeries_quotient_cyclic:
     let pMN' : LTSeries (Submodule R M) := LTSeries.map pMN (Submodule.comap (Submodule.mkQ N))
       (Submodule.comap_strictMono_of_surjective <| Submodule.mkQ_surjective N)
     refine ⟨RelSeries.smash pN' pMN' (by simp [pN', pMN', hpN2, hpMN1]), by simp [pN', hpN1], by simp [pMN', hpMN2], ?_⟩
-    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R, Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
+    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R,
+      Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
     · intro i
       obtain ⟨P, ⟨hP'⟩⟩ := hpN3 i
       refine ⟨P, ⟨LinearEquiv.trans (show (_ ≃ₗ[R] _) from ?_) hP'⟩⟩
@@ -110,10 +243,8 @@ theorem exists_LTSeries_quotient_cyclic:
       exact mkQ_equiv ..
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-variable [IsNoetherianRing R]
-
 -- [Stacks 00L0]
-theorem exists_LTSeries_quotient_iso_quotient_prime :
+theorem exists_LTSeries_quotient_iso_quotient_prime [IsNoetherianRing R] :
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
     ∀ (i : Fin p.length), ∃ P : Ideal R, P.IsPrime ∧ Nonempty (
     ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ P)) := by
@@ -172,7 +303,7 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
         let N' := Submodule.span R {x • a}
         apply P_ext _ N'
         · apply ih (Ideal.torsionOf R N (x • a)) ?_ (ModuleCat.of R N')
-            ⟨x • a, Submodule.mem_span_singleton_self (x • a)⟩
+           ⟨x • a, Submodule.mem_span_singleton_self (x • a)⟩
           · ext y
             simp only [Submodule.mem_top, true_iff]
             obtain ⟨z, hz⟩ := y
@@ -192,80 +323,31 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
               use y
               rw [smul_smul, ← Ideal.mem_torsionOf_iff, ← Ideal.mem_torsionOf_iff, hI]
               exact ⟨hxy, hy⟩
-        · apply ih (Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) ?_ (ModuleCat.of R (N ⧸ N')) (N'.mkQ a)
-          · sorry
-          · sorry
-          · sorry
+        · refine ih (Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) ?_ (ModuleCat.of R (N ⧸ N')) (N'.mkQ a) ?_ rfl
+          · rw [← hI, lt_iff_le_not_le]
+            constructor
+            · intro z hz
+              rw [Ideal.mem_torsionOf_iff] at hz ⊢
+              rw [← map_smul, hz, map_zero]
+            · show ¬ ((Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) : Set R) ⊆ (Ideal.torsionOf R N a)
+              simp only [Ideal.coe_torsionOf, Set.not_subset, Set.mem_preimage,
+                LinearMap.toSpanSingleton_apply, Set.mem_singleton_iff, N']
+              refine ⟨x, ⟨?_, by rw [← Ideal.mem_torsionOf_iff, hI]; exact hx⟩⟩
+              rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+              exact Submodule.mem_span_singleton_self (x • a)
+          · ext y
+            simp only [Submodule.mem_top, true_iff]
+            obtain ⟨z, hz⟩ := N'.mkQ_surjective y
+            simp only [N', Submodule.mem_span_singleton] at ⊢
+            obtain ⟨b, hb⟩ : ∃ b : R, b • a = z := by
+              rw [← Submodule.mem_span_singleton, ← hN]; trivial
+            exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
-    [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
-    (hexact : Function.Exact f g) : (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
-  intro p ⟨hp, ⟨x, eq⟩⟩
-  set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
-  have := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
-  rw [← eq, ← hM'] at this
-  by_cases ch : M' ⊓ LinearMap.range f = ⊥
-  · set N' := Submodule.map g M' with hN'
-    set g_restrict : M' →ₗ[R] N' := LinearMap.restrict g (fun x a ↦ Submodule.mem_map_of_mem a) with hg
-    have : Function.Bijective g_restrict := by
-      constructor
-      · intro a b heq
-        have (x : M'): g (x : M) = g_restrict x := rfl
-        have : g (a : M) = g (b : M) := by rw [this, this, heq]
-        rw [← sub_eq_zero, ← LinearMap.map_sub, hexact] at this
-        have : (a - b : M) ∈ M' ⊓ LinearMap.range f := ⟨sub_mem (Submodule.coe_mem a) (Submodule.coe_mem b), this⟩
-        rw [ch, Submodule.mem_bot] at this
-        rw [Subtype.ext_val_iff, ← sub_eq_zero, this]
-      · intro y₀
-        obtain ⟨x₀, x₀in, hx₀⟩ : (y₀ : N) ∈ g '' M' := Subtype.coe_prop y₀
-        use ⟨x₀, x₀in⟩
-        exact SetLike.coe_eq_coe.mp hx₀
-    sorry
-  · sorry
-
-lemma AssociatedPrimes.sub_cup_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
-    [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
-    associatedPrimes R N ⊆ associatedPrimes R M ∪ associatedPrimes R (N ⧸ Submodule.map f ⊤) := sorry
-
-lemma AssociatedPrimes.sub_cup_quotient {M : Type*} [AddCommGroup M] [Module R M]
-    (p q : Submodule R M) (hpq : p < q) :
-    (associatedPrimes R q) ⊆ (associatedPrimes R p) ∪
-    (associatedPrimes R (q ⧸ (Submodule.comap q.subtype p))) := by sorry
-
-lemma AssociatedPrimes.sub_iUnion_quotient (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
-    (h_last : p.last = ⊤) :
-    associatedPrimes R M ⊆ ⋃ i : Fin p.length,
-    associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) :=
-  sorry
-
-lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [p.IsPrime] :
-    associatedPrimes R (R ⧸ p) = {p} := sorry
-
-theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
-    (h_last : p.last = ⊤) (P : Fin p.length → Ideal R)
-    (hPprime : ∀ (i : Fin p.length), (P i).IsPrime)
-    (hP : ∀ (i : Fin p.length), Nonempty
-      (((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ (P i)))) :
-    (associatedPrimes R M) ⊆ P '' Set.univ := by
-  have heq1 : ∀ (i : Fin p.length), associatedPrimes R ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) = associatedPrimes R (R ⧸ (P i)) := by
-    intro i
-    let e := Classical.choice (hP i)
-    exact LinearEquiv.AssociatedPrimes.eq e
-  have heq1' := Set.iUnion_congr heq1
-  have heq2 : ∀ (i : Fin p.length), associatedPrimes R (R ⧸ (P i)) = {P i} := by
-    intro i
-    exact AssociatedPrimes.quotient_prime_eq_singleton R _
-  have heq2' := Set.iUnion_congr heq2
-  have hmem: ⋃ i : Fin p.length, {P i} ⊆ P '' Set.univ := by
-    rw[Set.iUnion_subset_iff]
-    intro i
-    rw [Set.image_univ, Set.singleton_subset_iff, Set.mem_range]
-    use i
-  apply subset_trans (AssociatedPrimes.sub_iUnion_quotient _ _ p h_head h_last)
-  rw [heq1', heq2']
-  exact hmem
-
-
 theorem AssociatedPrimes.finite_of_noetherian [IsNoetherianRing R] : (associatedPrimes R M).Finite := by
-  sorry
+  obtain ⟨p, h_head, h_tail, h⟩:= exists_LTSeries_quotient_iso_quotient_prime R M
+  choose P h1 h2 using h
+  refine Set.Finite.subset ?_ (AssociatedPrimes.of_quotient_iso_quotient_prime R M p h_head h_tail P h1 h2)
+  exact Set.toFinite (P '' Set.univ)
+
+end noetherian

@@ -1,5 +1,7 @@
 import CohenMacaulay.Dependency.AssociatedPrime
 import CohenMacaulay.Dependency.StableSES
+import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.FromPR.HasEnoughProjectives
+import CohenMacaulay.HomLoc_exchange
 import CohenMacaulay.lemma212
 import CohenMacaulay.lemma213
