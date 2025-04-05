@@ -116,7 +116,8 @@ section extension
 
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
     [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
-    (hexact : Function.Exact f g) : (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
+    (finj : Function.Injective f) (hexact : Function.Exact f g) :
+    (associatedPrimes R M) ⊆ (associatedPrimes R L) ∪ (associatedPrimes R N) := by
   intro p ⟨hp, ⟨x, eq⟩⟩
   set M' := LinearMap.range (LinearMap.toSpanSingleton R M x) with hM'
   have M'_iso := LinearMap.quotKerEquivRange (LinearMap.toSpanSingleton R M x)
@@ -142,7 +143,8 @@ lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L
     apply associatedPrimes_subset_of_submodule R N'
     rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
-  · sorry
+  · 
+    sorry
 
 lemma AssociatedPrimes.subset_union_of_injective {M N : Type*} [AddCommGroup M] [Module R M]
     [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (hinj : Function.Injective f) :
