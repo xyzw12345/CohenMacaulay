@@ -8,66 +8,82 @@ open IsLocalRing LinearMap
 
 variable {R M N : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
 
-/- Draft : (7.C) Lemma 7.1. Let $S$ be a multiplicative subset of A, and put
+lemma comap_localization_mem_associatePrimes_of_mem_associatePrimes (S : Submonoid R)
+    (p : Ideal (Localization S)) [p.IsPrime]
+    (ass : p ∈ associatedPrimes (Localization S) (LocalizedModule S M)) :
+    p.comap (algebraMap R (Localization S)) ∈ associatedPrimes R M := by
 
-$A^{\prime}=S^{-1} A$, $M^{\prime}=S^{-1} M$. Then
+  sorry
 
-$$
-\operatorname{Ass}_A\left(M^{\prime}\right)=f\left(\operatorname{Ass}_{A^{\prime}}\left(M^{\prime}
-\right)\right)=\operatorname{Ass}_A(M) \cap\{\mathfrak{p} \mid \mathfrak{p} \cap S=\varnothing\}
-$$
+lemma mem_associatePrimes_of_mem_associatePrimes_comap_localization (S : Submonoid R)
+    (p : Ideal (Localization S)) [p.IsPrime]
+    (ass : p.comap (algebraMap R (Localization S)) ∈ associatedPrimes R M) :
+    p ∈ associatedPrimes (Localization S) (LocalizedModule S M) := by
+  rcases ass with ⟨hp, x, hx⟩
+  constructor
+  · --may be able to remove `p.IsPrime`
+    trivial
+  · use LocalizedModule.mkLinearMap S M x
+    ext t
+    induction' t using Localization.induction_on with a
+    simp only [LocalizedModule.mkLinearMap_apply, LinearMap.mem_ker,
+      LinearMap.toSpanSingleton_apply, LocalizedModule.mk_smul_mk, mul_one]
+    rw [IsLocalizedModule.mk_eq_mk', IsLocalizedModule.mk'_eq_zero']
+    refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+    · use 1
+      simp only [← LinearMap.toSpanSingleton_apply, one_smul, ← LinearMap.mem_ker, ← hx,
+        Ideal.mem_comap, ← Localization.mk_one_eq_algebraMap]
+      have : Localization.mk a.1 1 = Localization.mk a.1 a.2 * Localization.mk a.2.1 (1 : S) := by
+        simp only [Localization.mk_mul, mul_one, ← sub_eq_zero, Localization.sub_mk,
+          one_mul, sub_zero]
+        simp [mul_comm, Localization.mk_zero]
+      rw [this]
+      exact Ideal.IsTwoSided.mul_mem_of_left _ h
+    · rcases h with ⟨s, hs⟩
+      have : s • a.1 • x = (s.1 * a.1) • x := smul_smul s.1 a.1 x
+      rw [this, ← LinearMap.toSpanSingleton_apply, ← LinearMap.mem_ker, ← hx, Ideal.mem_comap,
+        ← Localization.mk_one_eq_algebraMap] at hs
+      have : Localization.mk a.1 a.2 =
+        Localization.mk (s.1 * a.1) 1 * Localization.mk 1 (s * a.2) := by
+        simp only [Localization.mk_mul, mul_one, one_mul, ← sub_eq_zero, Localization.sub_mk,
+          Submonoid.coe_mul, sub_zero]
+        simp [← mul_assoc, mul_comm s.1 a.2.1, Localization.mk_zero]
+      rw [this]
+      exact Ideal.IsTwoSided.mul_mem_of_left _ hs
 
-where $f$ is the natural map $\operatorname{Spec}\left(A^{\prime}\right) \longrightarrow
-\operatorname{Spec}(A)$.
+  /-
+  refine ⟨fun h ↦ ?_, fun ⟨h, ass⟩ ↦ ?_⟩
+  · constructor
+    · rw [← IsLocalization.map_algebraMap_ne_top_iff_disjoint S (Localization S)]
+      exact h.isPrime.ne_top
+    ·
+      sorry
+  · rcases ass with ⟨hp, x, hx⟩
+    /-
+    let f : R ⧸ p →ₗ[R] M := p.liftQ (LinearMap.toSpanSingleton R M x) (le_of_eq hx)
+    have inj1 : Function.Injective f :=
+      LinearMap.ker_eq_bot.mp (Submodule.ker_liftQ_eq_bot _ _ _ (le_of_eq hx.symm))
+    let Sf := LocalizedModule.map S f
+    have inj2 : Function.Injective Sf := LocalizedModule.map_injective S f inj1
+    let iso'' : (Localization S) ≃ₗ[Localization S] (LocalizedModule S R) := sorry
+    let iso' : ((Localization S) ⧸ (Ideal.map (algebraMap R (Localization S)) p)) ≃ₗ[Localization S] (LocalizedModule S R ⧸ Submodule.localized S p) := by
 
-Proof. Left to the reader. One must use the fact that any ideal of $A$ is finitely generated. -/
+      sorry
+    let iso := iso'.trans (localizedQuotientEquiv S p)
+    refine ⟨IsLocalization.isPrime_of_isPrime_disjoint S (Localization S) p hp h, ?_⟩
+    -/
+    refine ⟨IsLocalization.isPrime_of_isPrime_disjoint S (Localization S) p hp h, ?_⟩
+    use LocalizedModule.mkLinearMap S M x
+    ext r
+    simp only [LocalizedModule.mkLinearMap_apply, LinearMap.mem_ker,
+      LinearMap.toSpanSingleton_apply]
 
+    sorry-/
 
-variable {p : Ideal R} [hp : p.IsPrime]
-
-#check (IsLocalization.AtPrime.orderIsoOfPrime (Localization.AtPrime p) p).toFun
-
-#check ((associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M)))
-
--- lemma s: ((associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M))) ⊆
--- { p_1 : Ideal (Localization.AtPrime p) // p_1.IsPrime } := sorry
-
--- #check (Set { p_1 // p_1.IsPrime } : Set (Ideal (Localization.AtPrime p)))
-
--- variable (p_1 : Ideal (Localization.AtPrime p))
-
--- #check p_1.IsPrime
-
--- #check (IsLocalization.AtPrime.orderIsoOfPrime (Localization.AtPrime p) p).toFun ''
---   ((associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M)) : Set { p_1 // p_1.IsPrime })
-
--- lemma mem_associatePrimes_localizedModule_iff1  :
---     (IsLocalization.AtPrime.orderIsoOfPrime (Localization.AtPrime p) p).toFun '' (associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M))
---     = associatedPrimes R M ∩ {p_1 // (p_1 : Set ) ∩ p = ⊥}
---     := sorry
-
-
-lemma mem_associatePrimes_localizedModule_iff {p : Ideal R} [hp : p.IsPrime] :
+lemma mem_associatePrimes_localizedModule_atPrime_iff {p : Ideal R} [p.IsPrime] :
     maximalIdeal (Localization.AtPrime p) ∈
     associatedPrimes (Localization.AtPrime p) (LocalizedModule p.primeCompl M)
     ↔ p ∈ associatedPrimes R M := by
-  -- constructor
-  -- · intro ⟨nhp, ⟨x, eq⟩⟩
-  --   constructor
-  --   · exact hp
-  --   · unfold toSpanSingleton at *
-  --     obtain ⟨⟨a, b⟩, ha⟩ := Quotient.exists_rep x
-  --     rw [← ha] at eq
-  --     -- have : (x : LocalizedModule p.primeCompl M) , ∃ LocalizedModule.mk = x:= sorry
-  --     sorry
-  -- · intro ⟨_, ⟨x, eq⟩⟩
-  --   constructor
-  --   · exact Ideal.IsMaximal.isPrime' (maximalIdeal (Localization.AtPrime p))
-  --   · unfold toSpanSingleton at *
-  --     -- #check LocalizedModule.mk (p.primeCompl) M
-  --     #check LocalizedModule.mk
-  --     sorry
-  #check IsLocalization.AtPrime.orderIsoOfPrime (Localization.AtPrime p) p
 
   sorry
 
@@ -103,7 +119,7 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   let Mₚ' := Mₚ ⧸ (IsLocalRing.maximalIdeal (Localization.AtPrime p)) • (⊤ : Submodule Rₚ Mₚ)
   let _ : Module p.ResidueField Nₚ' :=
     Module.instQuotientIdealSubmoduleHSMulTop Nₚ (maximalIdeal (Localization.AtPrime p))
-  have := AssociatePrimes.mem_iff.mp (mem_associatePrimes_localizedModule_iff.mpr pass)
+  have := AssociatePrimes.mem_iff.mp (mem_associatePrimes_localizedModule_atPrime_iff.mpr pass)
   rcases this.2 with ⟨x, hx⟩
   let to_res : Nₚ →ₗ[Rₚ] p.ResidueField := sorry
   --need surjective
