@@ -1,6 +1,7 @@
 import Mathlib.Algebra.Module.FinitePresentation
 
-variable {R M N P: Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N] (S : Submonoid R) [Module.FinitePresentation R M]
+variable {R : Type*} (M N : Type*) [CommRing R] [AddCommGroup M] [AddCommGroup N]
+  [Module R M] [Module R N] (S : Submonoid R) [Module.FinitePresentation R M]
 
 noncomputable def Module.FinitePresentation.LinearEquiv_map :=
   IsLocalizedModule.linearEquiv S (LocalizedModule.mkLinearMap S (M →ₗ[R] N))

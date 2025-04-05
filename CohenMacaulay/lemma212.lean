@@ -1,3 +1,5 @@
+import CohenMacaulay.HomLoc_exchange
+
 import Mathlib.RingTheory.Regular.IsSMulRegular
 import Mathlib.RingTheory.Spectrum.Prime.Defs
 import Mathlib.RingTheory.Support
@@ -94,6 +96,7 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
     rw [smul_zero, ← map_smul, Module.mem_annihilator.mp mem_ann x, map_zero]
   simpa using reg this
 
+set_option linter.unusedTactic false
 lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
     (hom0 : Subsingleton (N →ₗ[R] M)) :
     ∃ r ∈ Module.annihilator R N, IsSMulRegular M r := by
@@ -128,6 +131,9 @@ lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
   let f := i.comp to_res
   have f_ne0 : f ≠ 0 := sorry
   absurd hom0
-  rw [not_subsingleton_iff_nontrivial]
-  --need iso
-  sorry
+
+  haveI := Module.finitePresentation_of_finite R N
+  contrapose! f_ne0
+  exact (LinearEquiv.map_eq_zero_iff
+    (Module.FinitePresentation.LinearEquiv_mapExtendScalars N M p'.asIdeal.primeCompl).symm).mp
+      (Subsingleton.eq_zero _)
