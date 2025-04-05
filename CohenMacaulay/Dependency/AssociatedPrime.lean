@@ -256,7 +256,8 @@ lemma AssociatedPrimes.sub_iUnion_quotient (p : LTSeries (Submodule R M)) (h_hea
   sorry
 
 lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [p.IsPrime] :
-    associatedPrimes R (R ⧸ p) = {p} := sorry
+    associatedPrimes R (R ⧸ p) = {p} := by
+  sorry
 
 theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule R M)) (h_head : p.head = ⊥)
     (h_last : p.last = ⊤) (P : Fin p.length → Ideal R)
@@ -273,7 +274,7 @@ theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule
     intro i
     exact AssociatedPrimes.quotient_prime_eq_singleton R _
   have heq2' := Set.iUnion_congr heq2
-  have hmem: ⋃ i : Fin p.length, {P i} ⊆ P '' Set.univ := by
+  have hmem : ⋃ i : Fin p.length, {P i} ⊆ P '' Set.univ := by
     rw[Set.iUnion_subset_iff]
     intro i
     rw [Set.image_univ, Set.singleton_subset_iff, Set.mem_range]
@@ -281,7 +282,6 @@ theorem AssociatedPrimes.of_quotient_iso_quotient_prime (p : LTSeries (Submodule
   apply subset_trans (AssociatedPrimes.sub_iUnion_quotient _ _ p h_head h_last)
   rw [heq1', heq2']
   exact hmem
-
 
 theorem AssociatedPrimes.finite_of_noetherian [IsNoetherianRing R] : (associatedPrimes R M).Finite := by
   sorry
