@@ -364,6 +364,9 @@ lemma AssociatedPrimes.sub_iUnion_quotient (p : LTSeries (Submodule R M)) (h_hea
   sorry
 
 theorem AssociatedPrimes.finite_of_noetherian [IsNoetherianRing R] : (associatedPrimes R M).Finite := by
-  sorry
+  obtain ⟨p, h_head, h_tail, h⟩:= exists_LTSeries_quotient_iso_quotient_prime R M
+  choose P h1 h2 using h
+  refine Set.Finite.subset ?_ (AssociatedPrimes.of_quotient_iso_quotient_prime R M p h_head h_tail P h1 h2)
+  exact Set.toFinite (P '' Set.univ)
 
 end noetherian
