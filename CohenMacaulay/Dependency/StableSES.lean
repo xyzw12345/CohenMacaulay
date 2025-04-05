@@ -20,6 +20,27 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
     (h_base : ∀ (N : ModuleCat.{v, u} R), (⊤ : Submodule R N).IsPrincipal → P N)
     (h_ext : ∀ (M : ModuleCat.{v, u} R), ∀ (N : Submodule R M), P (ModuleCat.of R N) → P (ModuleCat.of R (M ⧸ N)) → P M)
     (M : ModuleCat.{v, u} R) (hM : Module.Finite R M) : P M := by
+  have : ∃ (S : Set M.carrier), S.Finite ∧ Submodule.span R S = ⊤ := by
+    apply Module.finite_def.mp at hM
+    exact Submodule.fg_def.mp hM
+  have (n : ℕ) : ∀ (L : ModuleCat.{v, u} R), (∃ (S : Set L.carrier), S.Finite ∧ Nat.card S ≤ n ∧ Submodule.span R S = ⊤) → P L := by
+    induction' n with h ih
+    · intro L ⟨S, SFin, card, Sspan⟩
+      have empty : S = ∅ := Set.isEmpty_coe_sort.1 <|
+        (@Finite.card_eq_zero_iff _ SFin).1 <| nonpos_iff_eq_zero.1 card
+      have h_zero_aux : Subsingleton (ModuleCat.of R (⊤ : Submodule R L)) := by
+        refine {allEq a b := ?_}
+        have a_prop := a.2
+        have b_prop := b.2
+        simp_rw [← Sspan, empty, Submodule.span_empty, Submodule.mem_bot]
+          at a_prop b_prop
+        rwa [← b_prop, SetLike.coe_eq_coe] at a_prop
+      have h_zero₁ := h_zero (ModuleCat.of R (⊤ : Submodule R L)) h_zero_aux
+      have h_zero₂ := h_zero (ModuleCat.of R (L.carrier ⧸ (⊤ : Submodule R L))) <|
+        Submodule.subsingleton_quotient_iff_eq_top.2 rfl
+      exact h_ext L ⊤ h_zero₁ h_zero₂
+    · sorry
   sorry
+
 
 end ModuleCat
