@@ -54,12 +54,10 @@ theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
           (@Finite.card_eq_zero_iff _ SFin).1 <| nonpos_iff_eq_zero.1
             <| by rw [card, n_zero]
         have h_zero_aux : Subsingleton (ModuleCat.of R (⊤ : Submodule R L)) := by
-          refine {allEq a b := ?_}
-          have a_prop := a.2
-          have b_prop := b.2
+          refine {allEq := fun ⟨a, a_prop⟩ ⟨b, b_prop⟩ ↦ ?_}
           simp_rw [← Sspan, empty, Submodule.span_empty, Submodule.mem_bot]
             at a_prop b_prop
-          rwa [← b_prop, SetLike.coe_eq_coe] at a_prop
+          rwa [← b_prop, ← Subtype.mk_eq_mk] at a_prop
         have h_zero₁ := h_zero (ModuleCat.of R (⊤ : Submodule R L)) h_zero_aux
         have h_zero₂ := h_zero (ModuleCat.of R (L.carrier ⧸ (⊤ : Submodule R L))) <|
           Submodule.subsingleton_quotient_iff_eq_top.2 rfl
