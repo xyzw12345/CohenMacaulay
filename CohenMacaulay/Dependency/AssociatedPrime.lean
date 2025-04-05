@@ -192,10 +192,25 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
               use y
               rw [smul_smul, ← Ideal.mem_torsionOf_iff, ← Ideal.mem_torsionOf_iff, hI]
               exact ⟨hxy, hy⟩
-        · apply ih (Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) ?_ (ModuleCat.of R (N ⧸ N')) (N'.mkQ a)
-          · sorry
-          · sorry
-          · sorry
+        · refine ih (Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) ?_ (ModuleCat.of R (N ⧸ N')) (N'.mkQ a) ?_ rfl
+          · rw [← hI, lt_iff_le_not_le]
+            constructor
+            · intro z hz
+              rw [Ideal.mem_torsionOf_iff] at hz ⊢
+              rw [← map_smul, hz, map_zero]
+            · show ¬ ((Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) : Set R) ⊆ (Ideal.torsionOf R N a)
+              simp only [Ideal.coe_torsionOf, Set.not_subset, Set.mem_preimage,
+                LinearMap.toSpanSingleton_apply, Set.mem_singleton_iff, N']
+              refine ⟨x, ⟨?_, by rw [← Ideal.mem_torsionOf_iff, hI]; exact hx⟩⟩
+              rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+              exact Submodule.mem_span_singleton_self (x • a)
+          · ext y
+            simp only [Submodule.mem_top, true_iff]
+            obtain ⟨z, hz⟩ := N'.mkQ_surjective y
+            simp only [N', Submodule.mem_span_singleton] at ⊢
+            obtain ⟨b, hb⟩ : ∃ b : R, b • a = z := by
+              rw [← Submodule.mem_span_singleton, ← hN]; trivial
+            exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
