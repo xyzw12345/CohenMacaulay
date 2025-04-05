@@ -15,19 +15,29 @@ universe u v
 
 variable {R : Type u} [Ring R]
 
-lemma span_lemma {R M : Type*} [Ring R] [AddCommGroup M] [Module R M] (S T : Set M) (a : M)
+lemma span_lemma {M : Type*} [AddCommGroup M] [Module R M] (S T : Set M) (a : M)
   (hins : insert a T = S) (hspan : Submodule.span R S = ⊤) :
     Submodule.span R {Submodule.Quotient.mk a} =
       (⊤ : Submodule R (M ⧸ Submodule.span R T)) := by
-  ext x
-  constructor
-  · intro h
-    simp only [Submodule.mem_top]
-  · intro h
-    rw [Submodule.mem_span]
-    intro p hp
-    simp only [Set.singleton_subset_iff, SetLike.mem_coe] at hp
-    sorry
+  have := Submodule.span_image (Submodule.mkQ (Submodule.span R T)) (s := S)
+  rw [hspan, Submodule.map_top, Submodule.range_mkQ,
+    ← hins, Set.image_insert_eq] at this
+  have sub_zero : ((Submodule.mkQ (Submodule.span R T)) '' T) ⊆ {0} := by
+    rintro y ⟨hy₁, hy₂⟩
+    rw [← hy₂.2, Submodule.mkQ_apply, Set.mem_singleton_iff,
+      Submodule.Quotient.mk_eq_zero]
+    exact Submodule.mem_span.2 fun _ a ↦ a hy₂.1
+  by_cases hempty : IsEmpty T
+  · replace hempty : T = ∅ := Set.isEmpty_coe_sort.mp hempty
+    rw [hempty] at this ⊢
+    rwa [Set.image_empty, insert_empty_eq] at this
+  · replace sub_zero : ((Submodule.mkQ (Submodule.span R T)) '' T) = {0} := by
+      refine (Set.Nonempty.subset_singleton_iff ?_).mp sub_zero
+      simp only [Submodule.mkQ_apply, Set.image_nonempty]
+      refine Set.nonempty_iff_ne_empty.2 ?_
+      rwa [Set.isEmpty_coe_sort] at hempty
+    rw [← this, sub_zero, Set.pair_comm]
+    exact Submodule.span_insert_zero.symm
 
 theorem fg_induction (P : ModuleCat.{v, u} R → Prop)
     (h_zero : ∀ (N : ModuleCat.{v, u} R), Subsingleton N → P N)
