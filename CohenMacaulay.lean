@@ -1,3 +1,5 @@
--- This module serves as the root of the `CohenMacaulay` library.
--- Import modules here that should be built as part of the library.
+import CohenMacaulay.Dependency.AssociatedPrime
+import CohenMacaulay.Dependency.StableSES
+import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.lemma212
+import CohenMacaulay.lemma213
