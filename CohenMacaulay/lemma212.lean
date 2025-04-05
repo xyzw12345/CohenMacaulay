@@ -8,12 +8,45 @@ open IsLocalRing LinearMap
 
 variable {R M N : Type*} [CommRing R] [AddCommGroup M] [AddCommGroup N] [Module R M] [Module R N]
 
+/-
 lemma comap_localization_mem_associatePrimes_of_mem_associatePrimes (S : Submonoid R)
-    (p : Ideal (Localization S)) [p.IsPrime]
+    (p : Ideal (Localization S))
     (ass : p ∈ associatedPrimes (Localization S) (LocalizedModule S M)) :
     p.comap (algebraMap R (Localization S)) ∈ associatedPrimes R M := by
+  rcases ass with ⟨hp, x, hx⟩
+  induction' x using LocalizedModule.induction_on with m s
+  refine ⟨Ideal.IsPrime.under R p, ?_⟩
 
   sorry
+  /-
+  use m
+  ext t
+  simp only [hx, Ideal.mem_comap, ← Localization.mk_one_eq_algebraMap, mem_ker,
+    toSpanSingleton_apply, LocalizedModule.mk_smul_mk, one_mul]
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  ·
+    rw [IsLocalizedModule.mk_eq_mk', IsLocalizedModule.mk'_eq_zero, LocalizedModule.mkLinearMap_apply,
+    IsLocalizedModule.mk_eq_mk', IsLocalizedModule.mk'_eq_zero'] at h
+    /-
+    rcases h with ⟨u, hu⟩
+    have mem : u * t ∈ Ideal.comap (algebraMap R (Localization S)) p := by
+      simp only [hx, Ideal.mem_comap, ← Localization.mk_one_eq_algebraMap, mem_ker,
+        toSpanSingleton_apply, LocalizedModule.mk_smul_mk, ← smul_smul, one_mul]
+      have : u.1 • t • m = u • t • m := rfl
+      simp [this, hu]
+    have h_comap := (IsLocalization.isPrime_iff_isPrime_disjoint S (Localization S) p).mp hp
+    have : t ∈ Ideal.comap (algebraMap R (Localization S)) p := by
+      have := h_comap.1.mem_or_mem mem
+      have := Set.disjoint_left.mp h_comap.2 u.2
+      tauto
+    -/
+
+    sorry
+
+
+  · simp [h]
+  -/
+-/
 
 lemma mem_associatePrimes_of_mem_associatePrimes_comap_localization (S : Submonoid R)
     (p : Ideal (Localization S)) [p.IsPrime]
