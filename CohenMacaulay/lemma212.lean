@@ -1,4 +1,5 @@
 import CohenMacaulay.HomLoc_exchange
+import CohenMacaulay.Dependency.AssociatedPrime
 
 import Mathlib.RingTheory.Regular.IsSMulRegular
 import Mathlib.RingTheory.Spectrum.Prime.Defs
@@ -50,6 +51,28 @@ lemma comap_localization_mem_associatePrimes_of_mem_associatePrimes (S : Submono
   · simp [h]
   -/
 -/
+
+lemma Ideal.subset_union_prime_finite {R ι : Type*} [CommRing R] {s : Set ι}
+    (hs : s.Finite) {f : ι → Ideal R} (a b : ι)
+    (hp : ∀ i ∈ s, i ≠ a → i ≠ b → (f i).IsPrime) {I : Ideal R} :
+    ((I : Set R) ⊆ ⋃ i ∈ s, f i) ↔ ∃ i ∈ s, I ≤ f i := by
+  rcases Set.Finite.exists_finset hs with ⟨t, ht⟩
+
+  have heq : ⋃ i ∈ s, f i = ⋃ i ∈ t, (f i : Set R) := by
+    ext I
+    simp only [Set.mem_iUnion, SetLike.mem_coe, exists_prop]
+    apply exists_congr
+    intro i
+    simp only [ht i]
+  have hmem_union : ((I : Set R) ⊆ ⋃ i ∈ s, f i) ↔ ((I : Set R) ⊆ ⋃ i ∈ (t : Set ι), f i) := by
+    exact Eq.to_iff (congrArg (Subset ↑I) heq)
+  have hunion_prime :=
+    Ideal.subset_union_prime (R := R) a b (fun i hin ↦ hp i ((ht i).mp hin)) (I := I)
+  have hexists_le: (∃ i ∈ t, I ≤ f i) ↔ ∃ i ∈ s, I ≤ f i := by
+    apply exists_congr
+    intro i
+    simp only [ht i]
+  rw [hmem_union, hunion_prime, hexists_le]
 
 lemma mem_associatePrimes_of_mem_associatePrimes_comap_localization (S : Submonoid R)
     (p : Ideal (Localization S)) [p.IsPrime]
@@ -130,18 +153,22 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
     rw [smul_zero, ← map_smul, Module.mem_annihilator.mp mem_ann x, map_zero]
   simpa using reg this
 
+#help tactic nontriviality
+
 set_option linter.unusedTactic false
-lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
-    (hom0 : Subsingleton (N →ₗ[R] M)) :
+lemma lemma_212_b_nontrivial [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
+    [Nontrivial M] (hom0 : Subsingleton (N →ₗ[R] M)) :
     ∃ r ∈ Module.annihilator R N, IsSMulRegular M r := by
+
   by_contra! h
-  have : (Module.annihilator R N : Set R) ⊆ ⋃ p ∈ associatedPrimes R M, (p : Set R) := by
-    rw [biUnion_associatedPrimes_eq_compl_regular R M]
-    exact fun r hr ↦ h r hr
-  have : ∃ p ∈ associatedPrimes R M, Module.annihilator R N ≤ p := by
-    #check Ideal.subset_union_prime
-    sorry
-  rcases this with ⟨p, pass, hp⟩
+  have hexist : ∃ p ∈ associatedPrimes R M, Module.annihilator R N ≤ p := by
+    rcases associatedPrimes.nonempty R M with ⟨Ia, hIa⟩
+    apply (Ideal.subset_union_prime_finite (AssociatedPrimes.finite_of_noetherian R M) Ia Ia _).mp
+    · rw [biUnion_associatedPrimes_eq_compl_regular R M]
+      exact fun r hr ↦ h r hr
+    · exact fun I hin _ _ ↦ IsAssociatedPrime.isPrime hin
+
+  rcases hexist with ⟨p, pass, hp⟩
   let _ := pass.isPrime
   let p' : PrimeSpectrum R := ⟨p, pass.isPrime⟩
   have loc_ne_zero : p' ∈ Module.support R N := Module.mem_support_iff_of_finite.mpr hp
