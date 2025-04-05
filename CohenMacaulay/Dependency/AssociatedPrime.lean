@@ -97,7 +97,8 @@ theorem exists_LTSeries_quotient_cyclic:
     let pMN' : LTSeries (Submodule R M) := LTSeries.map pMN (Submodule.comap (Submodule.mkQ N))
       (Submodule.comap_strictMono_of_surjective <| Submodule.mkQ_surjective N)
     refine ⟨RelSeries.smash pN' pMN' (by simp [pN', pMN', hpN2, hpMN1]), by simp [pN', hpN1], by simp [pMN', hpMN2], ?_⟩
-    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R, Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
+    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R,
+      Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
     · intro i
       obtain ⟨P, ⟨hP'⟩⟩ := hpN3 i
       refine ⟨P, ⟨LinearEquiv.trans (show (_ ≃ₗ[R] _) from ?_) hP'⟩⟩
@@ -172,7 +173,7 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
         let N' := Submodule.span R {x • a}
         apply P_ext _ N'
         · apply ih (Ideal.torsionOf R N (x • a)) ?_ (ModuleCat.of R N')
-            ⟨x • a, Submodule.mem_span_singleton_self (x • a)⟩
+           ⟨x • a, Submodule.mem_span_singleton_self (x • a)⟩
           · ext y
             simp only [Submodule.mem_top, true_iff]
             obtain ⟨z, hz⟩ := y
