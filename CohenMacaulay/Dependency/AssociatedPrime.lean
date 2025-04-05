@@ -111,10 +111,8 @@ theorem exists_LTSeries_quotient_cyclic:
       exact mkQ_equiv ..
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-variable [IsNoetherianRing R]
-
 -- [Stacks 00L0]
-theorem exists_LTSeries_quotient_iso_quotient_prime :
+theorem exists_LTSeries_quotient_iso_quotient_prime [IsNoetherianRing R] :
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
     ∀ (i : Fin p.length), ∃ P : Ideal R, P.IsPrime ∧ Nonempty (
     ((p i.succ) ⧸ (Submodule.comap (p i.succ).subtype (p (Fin.castSucc i)))) ≃ₗ[R] (R ⧸ P)) := by
@@ -214,20 +212,45 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
             exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
-lemma associatedPrimes_of_mono {M : Type*} [AddCommGroup M] [Module R M] (N : Submodule R M) :
-    associatedPrimes R N ⊆ associatedPrimes R M := by
+lemma associatedPrimes_mono {M : Type*} [AddCommGroup M] [Module R M] (N1 N2 : Submodule R M) (h : N1 ≤ N2):
+    associatedPrimes R N1 ⊆ associatedPrimes R N2 := by
   intro p ⟨hp, ⟨x, eq⟩⟩
   constructor
   · exact hp
-  · use x
+  · use ⟨x.1, h x.2⟩
     ext t
     simp only [eq, LinearMap.mem_ker, LinearMap.toSpanSingleton_apply]
-    exact ⟨fun h ↦ (AddSubmonoid.mk_eq_zero N.toAddSubmonoid).mp h, fun h ↦ Submodule.coe_eq_zero.mp h⟩
+    exact ⟨fun h' ↦ Subtype.ext <| (AddSubmonoid.mk_eq_zero N1.toAddSubmonoid).mp h',
+      fun h ↦ Submodule.coe_eq_zero.mp congr($h.1)⟩
 
+lemma associatedPrimes_subset_of_submodule {M : Type*} [AddCommGroup M] [Module R M] (N : Submodule R M) :
+    associatedPrimes R N ⊆ associatedPrimes R M := by
+  have : associatedPrimes R M = associatedPrimes R (⊤ : Submodule R M) :=
+    LinearEquiv.AssociatedPrimes.eq Submodule.topEquiv.symm
+  rw [this]
+  apply associatedPrimes_mono R N ⊤ (fun {x} a ↦ trivial)
+
+open LinearMap in
 lemma AssociatedPrimes.quotient_prime_eq_singleton (p : Ideal R) [hp : p.IsPrime] :
     associatedPrimes R (R ⧸ p) = {p} := by
-  rw [associatedPrimes.eq_singleton_of_isPrimary (Ideal.IsPrime.isPrimary hp),
-    Ideal.IsPrime.radical hp]
+  have h0 : ker (toSpanSingleton R (R ⧸ p) 0) = ⊤ := by simp
+  have h1 (x : R ⧸ p) (h : x ≠ 0) : ker (toSpanSingleton R (R ⧸ p) x) = p := by
+    obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+    ext y
+    simp only [mem_ker, toSpanSingleton, smulRight, id_apply]
+    show (Ideal.Quotient.mk p (y * x)) = 0 ↔ y ∈ p
+    simp only [ne_eq, Ideal.Quotient.eq_zero_iff_mem] at h ⊢
+    exact ⟨fun h' ↦ by simpa [h] using (hp.mem_or_mem h'), fun h ↦ Ideal.IsTwoSided.mul_mem_of_left x h⟩
+  ext y
+  simp only [associatedPrimes, IsAssociatedPrime, Set.mem_setOf_eq, Set.mem_singleton_iff]
+  constructor
+  · rintro ⟨hy, ⟨x, hx⟩⟩
+    by_cases h : x = 0
+    · simp_rw [h, h0] at hx
+      exact False.elim (hy.1 hx)
+    · exact hx.trans (h1 x h)
+  · obtain ⟨x, hx⟩ : ∃ x : R ⧸ p, x ≠ 0 := exists_ne 0
+    exact fun h' ↦ ⟨h' ▸ hp, ⟨x, h'.trans (h1 x hx).symm⟩⟩
 
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
     [AddCommGroup N] [Module R L] [Module R M] [Module R N] (f : L →ₗ[R] M) (g : M →ₗ[R] N)
@@ -254,7 +277,7 @@ lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L
         exact SetLike.coe_eq_coe.mp hx₀
     set g_iso : M' ≃ₗ[R] N' := LinearEquiv.ofBijective g_restrict this
     right
-    apply associatedPrimes_of_mono R N'
+    apply associatedPrimes_subset_of_submodule R N'
     rw [← LinearEquiv.AssociatedPrimes.eq g_iso, LinearEquiv.AssociatedPrimes.eq (id M'_iso.symm),
       AssociatedPrimes.quotient_prime_eq_singleton, Set.mem_singleton_iff]
   · sorry
