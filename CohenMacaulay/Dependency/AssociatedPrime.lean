@@ -10,6 +10,14 @@ variable (R : Type u) (M : Type v) [CommRing R] [AddCommGroup M] [Module R M] [M
 
 section helper
 
+noncomputable def quotTorsionOfEquivSpanSingleton' (x : M) (hM : ⊤ = Submodule.span R {x}) :
+    ((⊤ : Submodule R M) ⧸ LinearMap.ker (⊤ : Submodule R M).subtype) ≃ₗ[R] R ⧸ Ideal.torsionOf R M x := by
+  have equiv : (LinearMap.range (⊤ : Submodule R M).subtype) ≃ₗ[R]
+      R ⧸ (Ideal.torsionOf R M x) := by
+    rw [Submodule.range_subtype, hM]
+    exact (Ideal.quotTorsionOfEquivSpanSingleton R M x).symm
+  exact (LinearMap.quotKerEquivRange <| Submodule.subtype _).trans equiv
+
 variable (N : Submodule R M)
 
 private theorem RelSeries_smash_helper {α : Type*} {r : α → α → Prop} {s : α → α → Prop}
@@ -56,6 +64,7 @@ noncomputable def mkQ_equiv (N1 N2 : Submodule R (M ⧸ N)) : ((Submodule.comap 
 
 end helper
 
+-- [Stacks 00KZ]
 theorem exists_LTSeries_quotient_cyclic:
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
     ∀ (i : Fin p.length), ∃ P : Ideal R, Nonempty (
@@ -75,11 +84,8 @@ theorem exists_LTSeries_quotient_cyclic:
       match i with
       | 0 =>
         refine ⟨Ideal.torsionOf R N a, ⟨?_⟩⟩
-        have equiv : (LinearMap.range (⊤ : Submodule R N).subtype) ≃ₗ[R]
-            R ⧸ (Ideal.torsionOf R N a) := by
-          rw [Submodule.range_subtype, hN]
-          exact (Ideal.quotTorsionOfEquivSpanSingleton R N a).symm
-        exact (LinearMap.quotKerEquivRange <| Submodule.subtype _).trans equiv
+        apply quotTorsionOfEquivSpanSingleton' ..
+        assumption
     · exact ⟨⟨0, fun i ↦ ⊥, fun i ↦ Fin.elim0 i⟩,
       ⟨rfl, ⟨subsingleton_iff_bot_eq_top.2 <|
         not_nontrivial_iff_subsingleton.1 htri, fun i ↦ Fin.elim0 i⟩⟩⟩
@@ -91,7 +97,8 @@ theorem exists_LTSeries_quotient_cyclic:
     let pMN' : LTSeries (Submodule R M) := LTSeries.map pMN (Submodule.comap (Submodule.mkQ N))
       (Submodule.comap_strictMono_of_surjective <| Submodule.mkQ_surjective N)
     refine ⟨RelSeries.smash pN' pMN' (by simp [pN', pMN', hpN2, hpMN1]), by simp [pN', hpN1], by simp [pMN', hpMN2], ?_⟩
-    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R, Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
+    apply RelSeries_smash_helper (α := Submodule R M) (s := fun M1 M2 ↦ ∃ P : Ideal R,
+      Nonempty ((M2 ⧸ (Submodule.comap M2.subtype M1)) ≃ₗ[R] (R ⧸ P)))
     · intro i
       obtain ⟨P, ⟨hP'⟩⟩ := hpN3 i
       refine ⟨P, ⟨LinearEquiv.trans (show (_ ≃ₗ[R] _) from ?_) hP'⟩⟩
@@ -106,6 +113,7 @@ theorem exists_LTSeries_quotient_cyclic:
 
 variable [IsNoetherianRing R]
 
+-- [Stacks 00L0]
 theorem exists_LTSeries_quotient_iso_quotient_prime :
     ∃ (p : LTSeries (Submodule R M)), p.head = ⊥ ∧ p.last = ⊤ ∧
     ∀ (i : Fin p.length), ∃ P : Ideal R, P.IsPrime ∧ Nonempty (
@@ -138,7 +146,7 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
       exact mkQ_equiv ..
   have P_base : ∀ (N : ModuleCat.{v, u} R), (⊤ : Submodule R N).IsPrincipal → P N := by
     rintro N ⟨a, hN⟩
-    generalize h : Ideal.torsionOf R N a = I
+    generalize hI : Ideal.torsionOf R N a = I
     induction I using WellFoundedGT.induction generalizing N a
     rename_i I ih
     by_cases h_triv : I = ⊤
@@ -147,16 +155,63 @@ theorem exists_LTSeries_quotient_iso_quotient_prime :
         apply subsingleton_of_bot_eq_top
         simp_all
       exact P_zero N this
-    · by_cases h : I.IsPrime
-      · sorry
+    · have : Nontrivial N := by
+        rw [← hI, Ideal.torsionOf_eq_top_iff] at h_triv
+        exact nontrivial_of_ne a 0 h_triv
+      by_cases h : I.IsPrime
+      · refine ⟨⟨1, fun i ↦ match i with | 0 => ⊥ | 1 => ⊤,
+          fun i ↦ match i with | 0 => bot_lt_top⟩, ⟨rfl, ⟨rfl, fun i ↦ ?_⟩⟩⟩
+        match i with
+        | 0 =>
+          refine ⟨I, h, ⟨hI ▸ ?_⟩⟩
+          apply quotTorsionOfEquivSpanSingleton' ..
+          assumption
       · rw [Ideal.isPrime_iff] at h
         simp only [ne_eq, h_triv, not_false_eq_true, true_and, not_forall, Classical.not_imp,
         not_or] at h
-        obtain ⟨x, y, hxy, hx, hy⟩ := h
+        obtain ⟨y, x, hxy, hy, hx⟩ := h
         let N' := Submodule.span R {x • a}
         apply P_ext _ N'
-        · sorry
-        · sorry
+        · apply ih (Ideal.torsionOf R N (x • a)) ?_ (ModuleCat.of R N')
+           ⟨x • a, Submodule.mem_span_singleton_self (x • a)⟩
+          · ext y
+            simp only [Submodule.mem_top, true_iff]
+            obtain ⟨z, hz⟩ := y
+            simp only [N', Submodule.mem_span_singleton] at hz ⊢
+            obtain ⟨b, hb⟩ := hz
+            exact ⟨b, Subtype.ext hb⟩
+          · ext b
+            simp
+          · rw [← hI, lt_iff_le_not_le]
+            constructor
+            · intro z hz
+              rw [Ideal.mem_torsionOf_iff] at hz ⊢
+              rw [smul_smul, mul_comm, ← smul_smul, hz, smul_zero]
+            · show ¬ ((Ideal.torsionOf R (↑N) (x • a)) : Set R) ⊆ (Ideal.torsionOf R (↑N) a)
+              simp only [Ideal.coe_torsionOf, Set.not_subset, Set.mem_preimage,
+                LinearMap.toSpanSingleton_apply, Set.mem_singleton_iff, N']
+              use y
+              rw [smul_smul, ← Ideal.mem_torsionOf_iff, ← Ideal.mem_torsionOf_iff, hI]
+              exact ⟨hxy, hy⟩
+        · refine ih (Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) ?_ (ModuleCat.of R (N ⧸ N')) (N'.mkQ a) ?_ rfl
+          · rw [← hI, lt_iff_le_not_le]
+            constructor
+            · intro z hz
+              rw [Ideal.mem_torsionOf_iff] at hz ⊢
+              rw [← map_smul, hz, map_zero]
+            · show ¬ ((Ideal.torsionOf R (N ⧸ N') (N'.mkQ a)) : Set R) ⊆ (Ideal.torsionOf R N a)
+              simp only [Ideal.coe_torsionOf, Set.not_subset, Set.mem_preimage,
+                LinearMap.toSpanSingleton_apply, Set.mem_singleton_iff, N']
+              refine ⟨x, ⟨?_, by rw [← Ideal.mem_torsionOf_iff, hI]; exact hx⟩⟩
+              rw [← map_smul, Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+              exact Submodule.mem_span_singleton_self (x • a)
+          · ext y
+            simp only [Submodule.mem_top, true_iff]
+            obtain ⟨z, hz⟩ := N'.mkQ_surjective y
+            simp only [N', Submodule.mem_span_singleton] at ⊢
+            obtain ⟨b, hb⟩ : ∃ b : R, b • a = z := by
+              rw [← Submodule.mem_span_singleton, ← hN]; trivial
+            exact ⟨b, by rw [← hz, ← hb, map_smul]⟩
   exact fg_induction P P_zero P_base P_ext _ inferInstance
 
 lemma exact_sequence_implies_associatedPrimes_cup {L M N: Type*} [AddCommGroup L] [AddCommGroup M]
