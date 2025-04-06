@@ -1,5 +1,6 @@
 import CohenMacaulay.lemma212
 import CohenMacaulay.lemma213
+import CohenMacaulay.Dependency.SMulRegular
 
 universe u v w
 
