@@ -3,6 +3,12 @@ import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
 import Mathlib
 
+
+lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [CommSemiring R] [AddCommMonoid M]
+    [AddCommMonoid M₂] [Module R M] [Module R M₂] (I : Ideal R)  (f : M →ₗ[R] M₂) (h : Function.Surjective f)
+    : I • ⊤ ⊔ (LinearMap.ker f) = comap f (I • ⊤) := by
+  sorry
+
 universe u v w
 
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian
@@ -64,6 +70,25 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
     match rs with
     | [] => absurd h'; simp
     | r :: rs =>
-      let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
-        ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
+      let ih : (N →ₗ[R] M ⧸ (ofList (r :: rs) • ⊤ : Submodule R M)) ≃+
+          Ext.{w} N (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) n := by
+        have h1 : IsWeaklyRegular (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) rs := sorry
+        have h2 : ∀ r ∈ rs, r ∈ Module.annihilator R N := by sorry
+        have h3 : rs.length = n := by simpa using h'
+        refine AddEquiv.trans (show _ ≃ₗ[R] _ from LinearEquiv.congrRight ?_).toAddEquiv (hn h1 h2 h3)
+        rw [ofList_cons]; simp only
+        let f : M →ₗ[R] ((M ⧸ span {r} • (⊤ : Submodule R M)) ⧸ ofList rs • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))) :=
+          ((ofList rs) • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))).mkQ ∘ₗ (span {r} • (⊤ : Submodule R M)).mkQ
+        refine (Submodule.quotEquivOfEq _ _ ?_).trans (f.quotKerEquivOfSurjective ?_)
+        · unfold f
+          rw [LinearMap.ker_comp, Submodule.ker_mkQ]
+          rw [← Submodule.smul_top_eq_comap_smul_top_of_surjective]
+          · simp [Submodule.sup_smul, sup_comm]
+          · exact Submodule.mkQ_surjective _
+        · simp only [LinearMap.coe_comp, f]
+          apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
+      -- let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
+      --   ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
+      refine ih.trans ?_
+
       sorry
