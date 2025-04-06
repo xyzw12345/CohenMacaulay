@@ -1,6 +1,7 @@
 import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
+import CohenMacaulay.Dependency.SMulRegular
 import Mathlib
 
 -- set_option maxHeartbeats 2000000 in
@@ -13,7 +14,7 @@ lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [Com
 
 universe u v w
 
-open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian
+open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian Pointwise
 -- set_option pp.universes true
 variable {R : Type u} [CommRing R] {M N : ModuleCat.{max u v} R} {n : ℕ}
   [UnivLE.{max u v, w}]
@@ -26,19 +27,19 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
   --CategoryTheory.HasExt.standard (ModuleCat.{max u v} R)
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
-noncomputable instance : SMul R (Ext N M n) := {
-  smul r f :=
-    let g : Ext M M 0 := Ext.mk₀ (ModuleCat.ofHom (r • (1 : M →ₗ[R] M)))
-    Ext.comp f g (add_zero n)
-}
+-- noncomputable instance : SMul R (Ext N M n) := {
+--   smul r f :=
+--     let g : Ext M M 0 := Ext.mk₀ (ModuleCat.ofHom (r • (1 : M →ₗ[R] M)))
+--     Ext.comp f g (add_zero n)
+-- }
 
-noncomputable def Ext.smulLeft : R → Ext N M n → Ext N M n :=
-  fun x => ((x • ·) : Ext N M n → Ext N M n)
+-- noncomputable def Ext.smulLeft : R → Ext N M n → Ext N M n :=
+--   fun x => ((x • ·) : Ext N M n → Ext N M n)
 
-lemma Ext.smulLeft_zero_of_ann (x : R) (hx : x ∈ Module.annihilator R N) :
-    Ext.smulLeft x = (0 : Ext N M n → Ext N M n) := by
+-- lemma Ext.smulLeft_zero_of_ann (x : R) (hx : x ∈ Module.annihilator R N) :
+--     Ext.smulLeft x = (0 : Ext N M n → Ext N M n) := by
 
-  sorry
+--   sorry
 
 noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
   generalize h' : rs.length = n
@@ -96,5 +97,7 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
       -- let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
       --   ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
       refine ih.trans ?_
-
+      -- #check Ext.covariantSequence N (SMul_ShortComplex M r)
+      have h4 : IsSMulRegular M r := by sorry
+      let seq := Ext.covariantSequence N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl
       sorry

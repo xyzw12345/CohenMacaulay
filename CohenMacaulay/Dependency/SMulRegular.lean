@@ -9,7 +9,9 @@ import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import Mathlib.RingTheory.Ideal.Operations
 import Mathlib.Algebra.Module.Submodule.Pointwise
 
-variable {R : Type*} [CommRing R] (M : ModuleCat R)
+universe u v w
+
+variable {R : Type u} [CommRing R] (M : ModuleCat.{v} R)
 
 open CategoryTheory Pointwise
 
@@ -27,6 +29,7 @@ def SMul_ShortComplex (r : R) :
       ModuleCat.hom_zero, LinearMap.zero_apply, Submodule.Quotient.mk_eq_zero]
     exact Submodule.smul_mem_pointwise_smul m r _ trivial
 
+variable {M} in
 lemma IsSMulRegular.SMul_ShortComplex_exact {r : R} (reg : IsSMulRegular M r) :
     (SMul_ShortComplex M r).ShortExact where
   exact := by
