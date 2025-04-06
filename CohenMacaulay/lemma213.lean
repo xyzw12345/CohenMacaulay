@@ -43,6 +43,7 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
 --   sorry
 
 -- set_option diagnostics true in
+open Pointwise in
 set_option maxHeartbeats 1000000 in
 noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
   generalize h' : rs.length = n
@@ -77,23 +78,21 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
     | [] => absurd h'; simp
     | r :: rs =>
       let ih : (N →ₗ[R] M ⧸ (ofList (r :: rs) • ⊤ : Submodule R M)) ≃+
-          Ext.{w} N (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) n := by
-        have h1 : IsWeaklyRegular (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) rs := by
-          have := ((isWeaklyRegular_cons_iff M r rs).mp hr).2
-          simp only [QuotSMulTop] at this
-          rw [← Submodule.ideal_span_singleton_smul r (⊤ : Submodule R M)] at this
-          simpa using this
+          Ext.{w} N (ModuleCat.of R (QuotSMulTop r M)) n := by
+        have h1 : IsWeaklyRegular (ModuleCat.of R (QuotSMulTop r M)) rs := ((isWeaklyRegular_cons_iff M r rs).mp hr).2
         have h2 : ∀ r ∈ rs, r ∈ Module.annihilator R N := fun _ hr ↦ h _ <| List.mem_cons_of_mem _ hr
         have h3 : rs.length = n := by simpa using h'
         refine AddEquiv.trans (show _ ≃ₗ[R] _ from LinearEquiv.congrRight ?_).toAddEquiv (hn h1 h2 h3)
         rw [ofList_cons]; simp only
-        let f : M →ₗ[R] ((M ⧸ span {r} • (⊤ : Submodule R M)) ⧸ ofList rs • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))) :=
-          ((ofList rs) • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))).mkQ ∘ₗ (span {r} • (⊤ : Submodule R M)).mkQ
+        let f : M →ₗ[R] ((QuotSMulTop r M) ⧸ ofList rs • (⊤ : Submodule R (QuotSMulTop r M))) :=
+          ((ofList rs) • (⊤ : Submodule R (QuotSMulTop r M))).mkQ ∘ₗ (r • (⊤ : Submodule R M)).mkQ
         refine (Submodule.quotEquivOfEq _ _ ?_).trans (f.quotKerEquivOfSurjective ?_)
         · unfold f
           rw [LinearMap.ker_comp, Submodule.ker_mkQ]
           rw [← Submodule.smul_top_eq_comap_smul_top_of_surjective]
-          · simp [Submodule.sup_smul, sup_comm]
+          · have : r • ⊤ = span {r} • (⊤ : Submodule R M) :=
+              (Submodule.ideal_span_singleton_smul r ⊤).symm
+            simp [this, Submodule.sup_smul, sup_comm]
           · exact Submodule.mkQ_surjective _
         · simp only [LinearMap.coe_comp, f]
           apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
