@@ -3,6 +3,14 @@ import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
 import Mathlib
 
+-- set_option maxHeartbeats 2000000 in
+lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [CommSemiring R] [AddCommGroup M]
+    [AddCommGroup M₂] [Module R M] [Module R M₂] (I : Ideal R)  (f : M →ₗ[R] M₂) (h : Function.Surjective f)
+    : I • ⊤ ⊔ (LinearMap.ker f) = comap f (I • ⊤) := by
+  refine le_antisymm (sup_le (smul_top_le_comap_smul_top I f) (LinearMap.ker_le_comap f)) ?_
+  rw [← Submodule.comap_map_eq f (I • (⊤ : Submodule R M)), Submodule.comap_le_comap_iff_of_surjective h,
+    Submodule.map_smul'', Submodule.map_top, LinearMap.range_eq_top.mpr h]
+
 universe u v w
 
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian
@@ -64,6 +72,29 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
     match rs with
     | [] => absurd h'; simp
     | r :: rs =>
-      let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
-        ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
+      let ih : (N →ₗ[R] M ⧸ (ofList (r :: rs) • ⊤ : Submodule R M)) ≃+
+          Ext.{w} N (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) n := by
+        have h1 : IsWeaklyRegular (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) rs := by
+          have := ((isWeaklyRegular_cons_iff M r rs).mp hr).2
+          simp only [QuotSMulTop] at this
+          rw [← Submodule.ideal_span_singleton_smul r (⊤ : Submodule R M)] at this
+          simpa using this
+        have h2 : ∀ r ∈ rs, r ∈ Module.annihilator R N := fun _ hr ↦ h _ <| List.mem_cons_of_mem _ hr
+        have h3 : rs.length = n := by simpa using h'
+        refine AddEquiv.trans (show _ ≃ₗ[R] _ from LinearEquiv.congrRight ?_).toAddEquiv (hn h1 h2 h3)
+        rw [ofList_cons]; simp only
+        let f : M →ₗ[R] ((M ⧸ span {r} • (⊤ : Submodule R M)) ⧸ ofList rs • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))) :=
+          ((ofList rs) • (⊤ : Submodule R (M ⧸ span {r} • (⊤ : Submodule R M)))).mkQ ∘ₗ (span {r} • (⊤ : Submodule R M)).mkQ
+        refine (Submodule.quotEquivOfEq _ _ ?_).trans (f.quotKerEquivOfSurjective ?_)
+        · unfold f
+          rw [LinearMap.ker_comp, Submodule.ker_mkQ]
+          rw [← Submodule.smul_top_eq_comap_smul_top_of_surjective]
+          · simp [Submodule.sup_smul, sup_comm]
+          · exact Submodule.mkQ_surjective _
+        · simp only [LinearMap.coe_comp, f]
+          apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
+      -- let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
+      --   ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
+      refine ih.trans ?_
+
       sorry
