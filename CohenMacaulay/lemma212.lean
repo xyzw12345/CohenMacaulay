@@ -64,15 +64,15 @@ lemma Ideal.subset_union_prime_finite {R ι : Type*} [CommRing R] {s : Set ι}
     apply exists_congr
     intro i
     simp only [ht i]
-  have hmem_union : ((I : Set R) ⊆ ⋃ i ∈ s, f i) ↔ ((I : Set R) ⊆ ⋃ i ∈ (t : Set ι), f i) := by
-    exact Eq.to_iff (congrArg (Subset ↑I) heq)
-  have hunion_prime :=
-    Ideal.subset_union_prime (R := R) a b (fun i hin ↦ hp i ((ht i).mp hin)) (I := I)
+  have hmem_union : ((I : Set R) ⊆ ⋃ i ∈ s, f i) ↔ ((I : Set R) ⊆ ⋃ i ∈ (t : Set ι), f i) :=
+    Eq.to_iff (congrArg (Subset ↑I) heq)
   have hexists_le: (∃ i ∈ t, I ≤ f i) ↔ ∃ i ∈ s, I ≤ f i := by
     apply exists_congr
     intro i
     simp only [ht i]
-  rw [hmem_union, hunion_prime, hexists_le]
+  rw [hmem_union,
+    Ideal.subset_union_prime (R := R) a b (fun i hin ↦ hp i ((ht i).mp hin)) (I := I),
+    hexists_le]
 
 lemma mem_associatePrimes_of_mem_associatePrimes_comap_localization (S : Submonoid R)
     (p : Ideal (Localization S)) [p.IsPrime]
@@ -155,7 +155,6 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
 
 #help tactic nontriviality
 
-set_option linter.unusedTactic false
 lemma lemma_212_b_nontrivial [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
     [Nontrivial M] (hom0 : Subsingleton (N →ₗ[R] M)) :
     ∃ r ∈ Module.annihilator R N, IsSMulRegular M r := by
@@ -216,3 +215,14 @@ lemma lemma_212_b_nontrivial [IsNoetherianRing R] [Module.Finite R M] [Module.Fi
   exact (LinearEquiv.map_eq_zero_iff
     (Module.FinitePresentation.LinearEquiv_mapExtendScalars N M p'.asIdeal.primeCompl).symm).mp
       (Subsingleton.eq_zero _)
+
+lemma lemma_212_b [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
+    (hom0 : Subsingleton (N →ₗ[R] M)) :
+    ∃ r ∈ Module.annihilator R N, IsSMulRegular M r := by
+  by_cases htrivial : Subsingleton M
+  · use 0
+    constructor
+    · exact Submodule.zero_mem (Module.annihilator R N)
+    · exact IsSMulRegular.zero
+  · let _ : Nontrivial M := not_subsingleton_iff_nontrivial.mp htrivial
+    exact lemma_212_b_nontrivial hom0
