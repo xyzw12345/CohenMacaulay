@@ -1,4 +1,5 @@
 import CohenMacaulay.FromPR.HasEnoughProjectives
+import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
 import Mathlib
 
@@ -31,8 +32,14 @@ lemma Ext.smulLeft_zero_of_ann (x : R) (hx : x ∈ Module.annihilator R N) :
 
   sorry
 
-def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
+noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
   generalize h : rs.length = n
   induction' n with n hn
-  · sorry
+  · rw [List.length_eq_zero_iff] at h
+    rw [h, ofList_nil, Submodule.bot_smul]
+    let e' : (M ⧸ (⊥ : Submodule R M)) ≃ₗ[R] M := Submodule.quotEquivOfEqBot (⊥ : Submodule R M) rfl
+    let e : (N →ₗ[R] (M ⧸ (⊥ : Submodule R M))) ≃ₗ[R] (N →ₗ[R] M) :=
+      LinearEquiv.congrRight (Submodule.quotEquivOfEqBot (⊥ : Submodule R M) rfl)
+    let e1 : (N →ₗ[R] M) ≃+ (N ⟶ M) := AddEquiv.symm ModuleCat.homAddEquiv
+    exact e.toAddEquiv.trans <| e1.trans <| (CategoryTheory.Abelian.homEquiv₀_hom N M).symm
   · sorry
