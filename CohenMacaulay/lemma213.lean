@@ -2,6 +2,7 @@ import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
 import CohenMacaulay.Dependency.SMulRegular
+import CohenMacaulay.Dependency.CategoryLemma
 import Mathlib
 
 -- set_option maxHeartbeats 2000000 in
@@ -96,15 +97,16 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
           · exact Submodule.mkQ_surjective _
         · simp only [LinearMap.coe_comp, f]
           apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
-      -- let e : (M ⧸ ofList (r :: rs) • (⊤ : Submodule R M)) ≃ₗ[R]
-      --   ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
       refine ih.trans ?_
-      -- #check Ext.covariantSequence N (SMul_ShortComplex M r)
       have h4 : IsSMulRegular M r := ((isWeaklyRegular_cons_iff M r rs).mp hr).1
-      -- let seq := Ext.covariantSequence N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl
-      let f : (Abelian.Ext N (ModuleCat.of R (M ⧸ span {r} • (⊤ : Submodule R M))) n) →+ Abelian.Ext N M (n + 1) :=
-        ((IsSMulRegular.SMul_ShortComplex_exact h4).extClass.postcomp (a := n) N (show n + 1 = n + 1 from rfl))
-      have hf_inj : AddMonoidHom.ker f = ⊥ := by
-        sorry
-      have hf_surj : AddMonoidHom.range f = ⊤ := sorry
-      exact (f.ofInjective (f.ker_eq_bot_iff.mp hf_inj)).trans (hf_surj ▸ AddSubgroup.topEquiv)
+      apply CategoryTheory.isoOfSubsingletonZeroMorphism
+        (CategoryTheory.Abelian.Ext.covariant_sequence_exact₃' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
+        (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
+        (Iso.refl _) (Iso.refl _) (by aesop_cat) h_left_subsingleton
+      dsimp [SMul_ShortComplex, Ext.postcomp]
+      ext
+      -- simp only [AddCommGrp.hom_comp, AddCommGrp.hom_ofHom, AddCommGrp.hom_zero,
+      --   AddMonoidHom.coe_comp, Function.comp_apply, AddMonoidHom.flip_apply,
+      --   Ext.bilinearComp_apply_apply, AddMonoidHom.zero_apply, id_eq]
+      -- simp [postcomp]
+      sorry
