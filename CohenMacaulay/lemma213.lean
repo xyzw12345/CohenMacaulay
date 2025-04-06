@@ -72,8 +72,12 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
     | r :: rs =>
       let ih : (N →ₗ[R] M ⧸ (ofList (r :: rs) • ⊤ : Submodule R M)) ≃+
           Ext.{w} N (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) n := by
-        have h1 : IsWeaklyRegular (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) rs := sorry
-        have h2 : ∀ r ∈ rs, r ∈ Module.annihilator R N := by sorry
+        have h1 : IsWeaklyRegular (ModuleCat.of R (M ⧸ (span {r} • (⊤ : Submodule R M)))) rs := by
+          have := ((isWeaklyRegular_cons_iff M r rs).mp hr).2
+          simp only [QuotSMulTop] at this
+          rw [← Submodule.ideal_span_singleton_smul r (⊤ : Submodule R M)] at this
+          simpa using this
+        have h2 : ∀ r ∈ rs, r ∈ Module.annihilator R N := fun _ hr ↦ h _ <| List.mem_cons_of_mem _ hr
         have h3 : rs.length = n := by simpa using h'
         refine AddEquiv.trans (show _ ≃ₗ[R] _ from LinearEquiv.congrRight ?_).toAddEquiv (hn h1 h2 h3)
         rw [ofList_cons]; simp only
