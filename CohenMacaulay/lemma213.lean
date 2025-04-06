@@ -32,4 +32,7 @@ lemma Ext.smulLeft_zero_of_ann (x : R) (hx : x ∈ Module.annihilator R N) :
   sorry
 
 def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
-  sorry
+  generalize h : rs.length = n
+  induction' n with n hn
+  · sorry
+  · sorry

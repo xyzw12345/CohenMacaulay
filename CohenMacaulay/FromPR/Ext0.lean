@@ -15,4 +15,10 @@ lemma mk₀_bijective : Function.Bijective (mk₀ (X := X) (Y := Y)) := sorry
 noncomputable def homEquiv₀ : Ext X Y 0 ≃ (X ⟶ Y) :=
   (Equiv.ofBijective _ (mk₀_bijective X Y)).symm
 
+namespace Ext
+
+lemma mk₀_add (f g : X ⟶ Y) : mk₀ (f + g) = mk₀ f + mk₀ g := sorry
+
+end Ext
+
 end CategoryTheory.Abelian
