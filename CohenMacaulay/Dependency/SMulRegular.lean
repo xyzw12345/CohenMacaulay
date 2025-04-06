@@ -3,7 +3,8 @@ import Mathlib.Algebra.Category.ModuleCat.Basic
 import Mathlib.Algebra.Homology.ShortComplex.Basic
 import Mathlib.LinearAlgebra.Quotient.Defs
 import Mathlib.RingTheory.Ideal.Span
-import Mathlib.Algebra.Homology.ShortComplex.Exact
+import Mathlib.Algebra.Homology.ShortComplex.ShortExact
+
 variable {R : Type*} [CommRing R] (M : ModuleCat R)
 
 open CategoryTheory
@@ -23,5 +24,5 @@ def SMul_ShortComplex (r : R) :
     exact Submodule.smul_mem_smul (Ideal.mem_span_singleton_self r) trivial
 
 lemma IsSMulRegular.SMul_ShortComplex_exact {r : R} (reg : IsSMulRegular M r) :
-    (SMul_ShortComplex M r).Exact :=
+    (SMul_ShortComplex M r).ShortExact :=
   sorry
