@@ -29,6 +29,8 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) (M : ModuleCat R) [Nontrivial M] [
         Equiv.subsingleton.symm (homEquiv₀_hom N M).toEquiv
       Equiv.subsingleton.symm (ModuleCat.homAddEquiv (M := N) (N := M)).toEquiv
     rcases lemma_212_b this with ⟨x, mem_ann, hx⟩
+    let seq := Ext.covariantSequence N hx.SMul_ShortComplex_exact
+    let seq_exact := Ext.covariantSequence_exact N hx.SMul_ShortComplex_exact
 
     sorry
 
