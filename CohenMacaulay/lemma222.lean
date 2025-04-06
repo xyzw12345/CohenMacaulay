@@ -36,7 +36,7 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
         Equiv.subsingleton.symm (homEquiv₀_hom N M).toEquiv
       Equiv.subsingleton.symm (ModuleCat.homAddEquiv (M := N) (N := M)).toEquiv
     rcases lemma_212_b this with ⟨x, mem_ann, hx⟩
-    let M' := M ⧸ span {x} • (⊤ : Submodule R M)
+    let M' := QuotSMulTop r M
     have ntr' : Nontrivial M' := by
       apply Submodule.Quotient.nontrivial_of_lt_top
       rw [Submodule.ideal_span_singleton_smul]
