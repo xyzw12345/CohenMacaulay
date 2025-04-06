@@ -15,11 +15,13 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
 set_option linter.unusedTactic false
+
+open Pointwise
+
 lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
-    I • (⊤ : Submodule R M) < ⊤ →
-    (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧ Module.support R N = PrimeSpectrum.zeroLocus I ∧
-    ∀ i < n, Subsingleton (Ext N M i)) → ∃ rs : List R, rs.length = n ∧
-    (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs := by
+    I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
+    Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i)) →
+    ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs := by
   induction' n with n ih
   · intro M ntr M_fin smul_lt exist_N
     use []
@@ -34,16 +36,17 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
         Equiv.subsingleton.symm (homEquiv₀_hom N M).toEquiv
       Equiv.subsingleton.symm (ModuleCat.homAddEquiv (M := N) (N := M)).toEquiv
     rcases lemma_212_b this with ⟨x, mem_ann, hx⟩
-    let M' := M ⧸ span {x} • (⊤ : Submodule R M)
+    let M' := QuotSMulTop r M
     have ntr' : Nontrivial M' := by
       apply Submodule.Quotient.nontrivial_of_lt_top
       rw [Submodule.ideal_span_singleton_smul]
       have := Ideal.le_radical mem_ann
       rw [h_supp', Ideal.mem_radical_iff] at this
       rcases this with ⟨k, hk⟩
-      have := IsSMulRegular.pow k hx
+
       sorry
     have smul_lt : I • (⊤ : Submodule R M') < ⊤ := by
+
       sorry
     let seq := Ext.covariantSequence N hx.SMul_ShortComplex_exact
     let seq_exact := Ext.covariantSequence_exact N hx.SMul_ShortComplex_exact
