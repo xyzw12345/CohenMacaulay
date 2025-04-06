@@ -15,11 +15,13 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
 set_option linter.unusedTactic false
+
+open Pointwise
+
 lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
-    I • (⊤ : Submodule R M) < ⊤ →
-    (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧ Module.support R N = PrimeSpectrum.zeroLocus I ∧
-    ∀ i < n, Subsingleton (Ext N M i)) → ∃ rs : List R, rs.length = n ∧
-    (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs := by
+    I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
+    Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i)) →
+    ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs := by
   induction' n with n ih
   · intro M ntr M_fin smul_lt exist_N
     use []
@@ -41,9 +43,10 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       have := Ideal.le_radical mem_ann
       rw [h_supp', Ideal.mem_radical_iff] at this
       rcases this with ⟨k, hk⟩
-      have := IsSMulRegular.pow k hx
+
       sorry
     have smul_lt : I • (⊤ : Submodule R M') < ⊤ := by
+
       sorry
     let seq := Ext.covariantSequence N hx.SMul_ShortComplex_exact
     let seq_exact := Ext.covariantSequence_exact N hx.SMul_ShortComplex_exact
