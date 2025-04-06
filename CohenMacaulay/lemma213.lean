@@ -98,6 +98,6 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
       --   ((M ⧸ (span {r}) • (⊤ : Submodule R M))) ⧸ (ofList rs • (⊤ : Submodule R (M ⧸ (span {r}) • (⊤ : Submodule R M)))) := sorry
       refine ih.trans ?_
       -- #check Ext.covariantSequence N (SMul_ShortComplex M r)
-      have h4 : IsSMulRegular M r := by sorry
+      have h4 : IsSMulRegular M r := ((isWeaklyRegular_cons_iff M r rs).mp hr).1
       let seq := Ext.covariantSequence N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl
       sorry
