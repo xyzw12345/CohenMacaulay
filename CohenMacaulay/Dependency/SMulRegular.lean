@@ -13,7 +13,7 @@ universe u v w
 
 variable {R : Type u} [CommRing R] (M : ModuleCat.{v} R)
 
-open CategoryTheory Ideal
+open CategoryTheory Ideal Pointwise
 
 def SMul_ShortComplex (r : R) :
     ShortComplex (ModuleCat R) where
@@ -36,9 +36,8 @@ lemma IsSMulRegular.SMul_ShortComplex_exact {r : R} (reg : IsSMulRegular M r) :
     simp only [SMul_ShortComplex, ShortComplex.ShortExact.moduleCat_exact_iff_function_exact,
       ModuleCat.hom_ofHom]
     intro x
-    simp [Submodule.mem_smul_pointwise_iff_exists]
-
-    sorry
+    simp [Submodule.mem_smul_pointwise_iff_exists, Submodule.ideal_span_singleton_smul r ⊤,
+      Submodule.mem_smul_pointwise_iff_exists]
   mono_f := by simpa [SMul_ShortComplex, ModuleCat.mono_iff_injective] using reg
   epi_g := by
     simpa [SMul_ShortComplex, ModuleCat.epi_iff_surjective] using Submodule.mkQ_surjective _
