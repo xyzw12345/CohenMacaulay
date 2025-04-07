@@ -112,7 +112,8 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
   tfae_have 4 → 1 := by
     intro ⟨rs, len, mem, reg⟩ N ⟨Nntr, Nfin, Nsupp⟩ i hi
     have Nsupp' := Nsupp
-    rw [Module.support_eq_zeroLocus] at Nsupp'
+    rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_subset_zeroLocus_iff] at Nsupp'
+
 
     sorry
   tfae_finish
