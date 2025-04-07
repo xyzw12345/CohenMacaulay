@@ -6,6 +6,13 @@ import CohenMacaulay.Dependency.CategoryLemma
 
 import Mathlib.RingTheory.Regular.RegularSequence
 
+lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [CommSemiring R] [AddCommGroup M]
+    [AddCommGroup M₂] [Module R M] [Module R M₂] (I : Ideal R)  (f : M →ₗ[R] M₂) (h : Function.Surjective f)
+    : I • ⊤ ⊔ (LinearMap.ker f) = comap f (I • ⊤) := by
+  refine le_antisymm (sup_le (smul_top_le_comap_smul_top I f) (LinearMap.ker_le_comap f)) ?_
+  rw [← Submodule.comap_map_eq f (I • (⊤ : Submodule R M)), Submodule.comap_le_comap_iff_of_surjective h,
+    Submodule.map_smul'', Submodule.map_top, LinearMap.range_eq_top.mpr h]
+
 universe u v w
 
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian Pointwise

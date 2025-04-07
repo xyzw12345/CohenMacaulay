@@ -50,15 +50,12 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       apply Submodule.Quotient.nontrivial_of_lt_top
       exact gt_of_gt_of_ge smul_lt le_smul
     have smul_lt' : I • (⊤ : Submodule R M') < ⊤ := by
-      rcases Set.not_top_subset.mp (not_subset_of_ssubset smul_lt) with ⟨m, hm⟩
-      have : Submodule.mkQ ((x ^ k) • ⊤) m ∉ I • (⊤ : Submodule R M') := by
-        have : (⊤ : Submodule R M') = Submodule.map (Submodule.mkQ ((x ^ k) • ⊤)) ⊤ := by simp
-        rw [this, ← Submodule.map_smul'', ← Submodule.mem_comap, Submodule.comap_map_eq]
-        simpa [le_smul] using hm
       rw [lt_top_iff_ne_top]
-      by_contra h
-      absurd this
-      simp [h]
+      by_contra eq
+      absurd lt_top_iff_ne_top.mp smul_lt
+      have := Submodule.smul_top_eq_comap_smul_top_of_surjective I
+        (Submodule.mkQ ((x ^ k) • (⊤ : Submodule R M))) (Submodule.mkQ_surjective _)
+      simpa [eq, le_smul] using this
     have exist_N' : (∃ N : ModuleCat R, Nontrivial ↑N ∧ Module.Finite R ↑N ∧
         Module.support R ↑N = PrimeSpectrum.zeroLocus ↑I ∧
           ∀ i < n, Subsingleton (Abelian.Ext N (ModuleCat.of R M') i)) := by
@@ -102,11 +99,17 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
       let M' := (QuotSMulTop a M)
       have le_smul : a • ⊤ ≤ I • (⊤ : Submodule R M) := by
         rw [← Submodule.ideal_span_singleton_smul]
-        exact Submodule.smul_mono_left ((span_singleton_le_iff_mem I).mpr (mem a List.mem_cons_self))
+        exact Submodule.smul_mono_left
+          ((span_singleton_le_iff_mem I).mpr (mem a List.mem_cons_self))
       have Qntr : Nontrivial M' :=
         Submodule.Quotient.nontrivial_of_lt_top _ (gt_of_gt_of_ge smul_lt le_smul)
       have smul_lt' : I • (⊤ : Submodule R M') < ⊤ := by
-        sorry
+        rw [lt_top_iff_ne_top]
+        by_contra eq
+        absurd lt_top_iff_ne_top.mp smul_lt
+        have := Submodule.smul_top_eq_comap_smul_top_of_surjective I
+          (Submodule.mkQ (a • (⊤ : Submodule R M))) (Submodule.mkQ_surjective _)
+        simpa [eq, le_smul] using this
       have exist_reg' : ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧
         IsRegular (ModuleCat.of R M') rs := by
         use rs'
