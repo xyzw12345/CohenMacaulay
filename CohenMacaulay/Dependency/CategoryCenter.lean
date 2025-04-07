@@ -43,6 +43,12 @@ def CenterZ.localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
     rw [CategoryTheory.Functor.comp_id, ← CategoryTheory.Functor.id_comp W.Q]
     exact CategoryTheory.NatTrans.hcomp α (NatTrans.id W.Q)
   map_one' := by aesop
-  map_mul' := by sorry
+  map_mul' α β := by
+    rw [NatTrans.ext_iff]; ext M;
+    simp only [Functor.id_obj, End.mul_def, eq_mpr_eq_cast, cast_eq,
+      Localization.Construction.natTransExtension_app, NatTrans.comp_app]
+    nth_rw 1 [show (NatTrans.id W.Q) = (NatTrans.id W.Q).vcomp (NatTrans.id W.Q) from rfl]
+    simp only [NatTrans.vcomp_eq_comp, CategoryTheory.NatTrans.exchange]
+    rfl
 
 end localization
