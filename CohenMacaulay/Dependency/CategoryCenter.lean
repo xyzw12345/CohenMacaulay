@@ -2,11 +2,12 @@ import Mathlib
 
 namespace CategoryTheory
 
-section CenterZ
-universe u v
-variable (C : Type v) [Category.{u, v} C]
+universe uC uC'
+variable (C : Type uC) [Category.{uC', uC} C]
 
-abbrev CenterZ : Type max u v := End (𝟭 C)
+section CenterZ
+
+abbrev CenterZ : Type max uC uC' := End (𝟭 C)
 
 instance CenterZ.comm_monoid : CommMonoid (CenterZ C) where
   mul_comm := fun a b => NatTrans.id_comm b a
@@ -29,4 +30,19 @@ def CenterZ.ring_action (R : Type*) [CommRing R] : R →+* CenterZ (ModuleCat R)
 
 def CenterZ.complex_map (A : Type*) : sorry := sorry
 
-def CenterZ.localization_map : sorry := sorry
+#check CategoryTheory.NatTrans.hcomp
+#check CategoryTheory.Localization.Construction.natTransExtension
+
+section localization
+
+variable {C} (W : MorphismProperty C)
+
+def CenterZ.localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
+  toFun α := by
+    apply CategoryTheory.Localization.Construction.natTransExtension
+    rw [CategoryTheory.Functor.comp_id, ← CategoryTheory.Functor.id_comp W.Q]
+    exact CategoryTheory.NatTrans.hcomp α (NatTrans.id W.Q)
+  map_one' := by aesop
+  map_mul' := by sorry
+
+end localization
