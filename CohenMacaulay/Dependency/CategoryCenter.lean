@@ -2,10 +2,8 @@ import Mathlib
 
 namespace CategoryTheory
 
-universe uC uC'
+universe uC uC' v
 variable (C : Type uC) [Category.{uC', uC} C]
-
-
 
 abbrev CenterZ : Type max uC uC' := End (𝟭 C)
 
@@ -60,3 +58,14 @@ def localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
 end localization
 
 end CenterZ
+
+section Ext
+
+variable {C} [Abelian C] [HasExt.{v} C]
+
+open Abelian in
+theorem homCommute (M : C) (N : C) (α : CenterZ C) (n : ℕ) :
+  (Ext.mk₀ (α.app M)).postcomp N (add_zero n) =
+    (Ext.mk₀ (α.app N)).precomp M (zero_add n) := sorry
+
+end Ext

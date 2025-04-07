@@ -99,59 +99,16 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
           apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
       refine ih.trans ?_
       have h4 : IsSMulRegular M r := ((isWeaklyRegular_cons_iff M r rs).mp hr).1
+      have : (CenterZ.ring_action R r).app N = 0 := by
+        show ModuleCat.ofHom (r • (LinearMap.id (R := R) (M := N))) = 0
+        have : r ∈ Module.annihilator R N := by apply h; exact List.mem_cons_self
+        ext x; simpa using (Module.mem_annihilator.mp this x)
       apply CategoryTheory.isoOfSubsingletonZeroMorphism
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₃' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
         (Iso.refl _) (Iso.refl _) (by aesop_cat) h_left_subsingleton
       dsimp only
-      -- dsimp [SMul_ShortComplex, Ext.postcomp]
-      -- ext
-      -- simp only [AddCommGrp.hom_comp, AddCommGrp.hom_ofHom, AddCommGrp.hom_zero,
-      --   AddMonoidHom.coe_comp, Function.comp_apply, AddMonoidHom.flip_apply,
-      --   Ext.bilinearComp_apply_apply, AddMonoidHom.zero_apply, id_eq]
-      -- simp [postcomp]
-      #check ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality
-      suffices ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N ⋯) = 0 by
+      suffices ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N _) = 0 by
         exact congrArg AddCommGrp.ofHom this
-      #check (SMul_ShortComplex M r).f
-      -- #check (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj N) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((shiftFunctor (HomologicalComplex (ModuleCat R) (ComplexShape.up ℤ)) (n + 1)).obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj M))
-      -- have lem (g' : (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj N) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((shiftFunctor (HomologicalComplex (ModuleCat R) (ComplexShape.up ℤ)) (n + 1)).obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)))
-          -- := ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality g'
-      -- ext (g : Abelian.Ext N M (n + 1))
-      #check ((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj N) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj (((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)⟦(n+1 : ℤ)⟧))
-      suffices ∀ g : ((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj N) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj (((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)⟦(n+1 : ℤ)⟧)),
-          g ≫ (((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.map ((shiftFunctor (HomologicalComplex (ModuleCat R) (ComplexShape.up ℤ)) (n + 1 : ℤ)).map ((CochainComplex.singleFunctor (ModuleCat R) 0).map (ModuleCat.ofHom (r • LinearMap.id) : M ⟶ M)))) : ((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj (((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)⟦(n+1 : ℤ)⟧) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj (((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)⟦(n+1 : ℤ)⟧)))
-          = ((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.map 0) by
-            -- (0 : ((HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj ((CochainComplex.singleFunctor (ModuleCat R) 0).obj N) ⟶ (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Q.obj (((CochainComplex.singleFunctor (ModuleCat R) 0).obj M)⟦(n+1 : ℤ)⟧)))
-            #check shiftFunctor (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)).Localization (n + 1 : ℤ)
-            #check shiftFunctor (HomologicalComplex (ModuleCat R) (ComplexShape.up ℤ)) (n + 1 : ℤ)
-            -- ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N ⋯) g = 0 by
-            sorry
-
-      -- unfold Abelian.Ext Localization.SmallShiftedHom Localization.SmallHom at g
-      -- have g' := (equivShrink _).symm g
-      -- have := ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality g'
-      -- simp only [Functor.id_obj, Functor.id_map, Function.comp_apply] at this
-
-      #check Localization.SmallShiftedHom.comp
-      #check Localization.SmallShiftedHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ))
-
-      -- rw [this]
-      -- suffices ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N ⋯) g' = 0 g' by
-      --   sorry
-      -- ext (g : SmallShiftedHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ))
-      -- ((CochainComplex.singleFunctor C 0).obj N)
-      -- ((CochainComplex.singleFunctor C 0).obj M) (n + 1))
-      -- #check ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality g
-      -- have nat := ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality g
-
-
-
-
-      sorry
-
-
-
-variable (R : Type*) [CommRing R] (r : R)
-
-#check ((CenterZ.localizationMonoidHom (HomologicalComplex.quasiIso (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.complex_map (ModuleCat R) (ComplexShape.up ℤ)) ∘ (CenterZ.ring_action R)) r).naturality
+      apply (CategoryTheory.homCommute M N (CenterZ.ring_action R r) (n + 1)).trans ?_
+      simp [this]
