@@ -4,6 +4,7 @@ import CohenMacaulay.lemma213
 --import CohenMacaulay.FromPR.Ext0 --replace these two with above later
 --import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.SMulRegular
+import CohenMacaulay.Dependency.RegularSequence
 
 universe u v w
 
@@ -35,9 +36,8 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
     rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_eq_iff] at h_supp'
     have : Subsingleton (N →ₗ[R] M) :=
       let _ := h_ext 0 n.zero_lt_succ
-      let _ : Subsingleton (N ⟶ M) :=
-        Equiv.subsingleton.symm (homEquiv₀_hom N M).toEquiv
-      Equiv.subsingleton.symm (ModuleCat.homAddEquiv (M := N) (N := M)).toEquiv
+      let _ : Subsingleton (N ⟶ M) := (homEquiv₀_hom N M).symm.subsingleton
+      (ModuleCat.homAddEquiv (M := N) (N := M)).symm.subsingleton
     rcases lemma_212_b this with ⟨x, mem_ann, hx⟩
     have := Ideal.le_radical mem_ann
     rw [h_supp', Ideal.mem_radical_iff] at this
@@ -128,9 +128,7 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     have reg' : IsRegular M rs' := by
 
       sorry
-    have reg'' : IsRegular M (rs'.take i) := by
-
-      sorry
+    have reg'' : IsRegular M (rs'.take i) := take_regular reg' i
     let e := lemma_213 reg''.toIsWeaklyRegular mem''
     have : (List.take i rs').length = i := by
       simpa [rs', len] using Nat.le_of_succ_le hi
