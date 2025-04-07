@@ -4,6 +4,7 @@ import CohenMacaulay.lemma212
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.CategoryCenter
+import CohenMacaulay.Dependency.ExtLemma
 import Mathlib
 
 -- set_option maxHeartbeats 2000000 in
