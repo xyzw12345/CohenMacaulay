@@ -1,8 +1,8 @@
 import CohenMacaulay.lemma212
---import CohenMacaulay.lemma213
-import CohenMacaulay.FromPR.HasEnoughProjectives
-import CohenMacaulay.FromPR.Ext0 --replace these two with above later
-import CohenMacaulay.Dependency.CategoryLemma
+import CohenMacaulay.lemma213
+--import CohenMacaulay.FromPR.HasEnoughProjectives
+--import CohenMacaulay.FromPR.Ext0 --replace these two with above later
+--import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.SMulRegular
 
 universe u v w
@@ -76,4 +76,14 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       true_and, isRegular_cons_iff]
     exact ⟨mem, hxk, reg⟩
 
---lemma lemma222 (use TFAE)
+lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
+    (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
+  [∀ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
+    Module.support R N ⊆ PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
+   --∀ i < n, Subsingleton (Ext (ModuleCat.of R (R⧸I)) M i),
+   ∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
+    Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
+    ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs
+    ].TFAE := by
+
+  sorry
