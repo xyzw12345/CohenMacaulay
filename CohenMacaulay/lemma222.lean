@@ -100,7 +100,7 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     simp
   tfae_have 2 → 3 := by
     intro h2
-    --#check h2 (ModuleCat.of R (R⧸I))
+    #check h2 (ModuleCat.of R (ULift.{v} (R⧸I)))
 
     sorry
   tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
