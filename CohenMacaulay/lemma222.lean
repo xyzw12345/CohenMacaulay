@@ -72,7 +72,25 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       true_and, isRegular_cons_iff]
     exact ⟨mem, hxk, reg⟩
 
-set_option maxHeartbeats 500000 in
+lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat R}
+    (f_mono : Mono (AddCommGrp.ofHom
+      ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i)))) :
+    Mono (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) := by
+  induction' k with k ih
+  · simp at kpos
+  · rw [pow_succ]
+    by_cases eq0 : k = 0
+    · rw [eq0, pow_zero, one_mul]
+      exact f_mono
+    · have := Nat.zero_lt_of_ne_zero eq0
+      have eq_comp : (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k * a)).f).postcomp N (add_zero i))) =
+      (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) ≫
+      (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i))) := by
+        sorry
+      rw [eq_comp]
+      exact CategoryTheory.mono_comp' (ih (Nat.zero_lt_of_ne_zero eq0)) f_mono
+
+set_option maxHeartbeats 1000000 in
 lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
     (Nfin : Module.Finite R N) (Nsupp : Module.support R N ⊆ PrimeSpectrum.zeroLocus I) :
     ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
@@ -127,9 +145,7 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
           N reg.1.SMul_ShortComplex_exact (i - 1) i (by omega))
           (ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _) smul_lt' exist_reg' (i - 1) lt)
         let gk := (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)))
-        have mono_gk : Mono gk := by
-
-          sorry
+        have mono_gk : Mono gk := mono_of_mono a kpos i mono_g
         have zero_gk : AddCommGrp.ofHom
           ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)) = 0 := by
           exact ext_hom_eq_zero_of_mem_ann hk (IsSMulRegular.pow k reg.1) i
