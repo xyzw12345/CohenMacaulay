@@ -1,5 +1,5 @@
 import CohenMacaulay.lemma212
-import CohenMacaulay.lemma213
+import CohenMacaulay.lemma213'
 --import CohenMacaulay.FromPR.HasEnoughProjectives
 --import CohenMacaulay.FromPR.Ext0 --replace these two with above later
 --import CohenMacaulay.Dependency.CategoryLemma
@@ -25,7 +25,7 @@ open Pointwise
 lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
     I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i)) →
-    ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs := by
+    ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs := by
   induction' n with n ih
   · intro M ntr M_fin smul_lt exist_N
     use []
@@ -76,6 +76,17 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       true_and, isRegular_cons_iff]
     exact ⟨mem, hxk, reg⟩
 
+lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
+    (Nfin : Module.Finite R N) (Nsupp : Module.support R N ⊆ PrimeSpectrum.zeroLocus I) :
+    ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
+    (∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs) →
+    ∀ i < n, Subsingleton (Ext N M i) := by
+  induction' n with n ih
+  · simp
+  · rintro M Mntr Mfin smul_lt ⟨rs, len, mem, reg⟩ i hi
+
+    sorry
+
 lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
   [∀ N : ModuleCat R, (Nontrivial N ∧ Module.Finite R N ∧
@@ -110,31 +121,6 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     rw [LinearEquiv.support_eq ULift.moduleEquiv, suppQ]
   tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
   tfae_have 4 → 1 := by
-    intro ⟨rs, len, mem, reg⟩ N ⟨Nntr, Nfin, Nsupp⟩ i hi
-    have le_rad := Nsupp
-    rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_subset_zeroLocus_iff] at le_rad
-    have : ∀ r ∈ rs, ∃ k, r ^ k ∈ Module.annihilator R N :=
-      fun r hr ↦ le_rad (mem r hr)
-    choose pow hpow using this
-    let rs' : List R := List.ofFn (fun i ↦ (rs.get i) ^ (pow _ (rs.get_mem i)))
-    have mem' : ∀ x ∈ rs', x ∈ Module.annihilator R N := by
-      intro x hx
-      rcases List.mem_iff_get.mp hx with ⟨t, ht⟩
-      simp only [← ht, List.get_eq_getElem, List.getElem_ofFn, rs']
-      apply hpow
-    have mem'' : ∀ x ∈ (rs'.take i), x ∈ Module.annihilator R N := by
-      intro x hx
-      exact mem' x (List.mem_of_mem_take hx)
-    have reg' : IsRegular M rs' := by
-
-      sorry
-    have reg'' : IsRegular M (rs'.take i) := take_regular reg' i
-    let e := lemma_213 reg''.toIsWeaklyRegular mem''
-    have : (List.take i rs').length = i := by
-      simpa [rs', len] using Nat.le_of_succ_le hi
-    rw [this] at e
-    have : Subsingleton (N →ₗ[R] M ⧸ ofList (List.take i rs') • (⊤ : Submodule R M)) := by
-      have : i < rs'.length := by simpa [rs', len] using hi
-      exact lemma_212_a (reg'.regular_mod_prev i this) (mem' _ (List.getElem_mem this))
-    exact e.symm.subsingleton
+    intro h4 N ⟨Nntr, Nfin, Nsupp⟩ i hi
+    exact lemma222_4_to_1 I n N Nntr Nfin Nsupp M Mntr Mfin smul_lt h4 i hi
   tfae_finish

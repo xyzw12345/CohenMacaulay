@@ -4,9 +4,12 @@ variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
 
 open RingTheory.Sequence
 
---surj regular move
-
 --power regular
+lemma pow_regular {rs : List R} (reg : IsRegular M rs) (f : Fin rs.length → ℕ)
+    (pos : ∀ i, f i > 0) (mem_j : ∀ r ∈ rs, r ∈ (Module.annihilator R M).jacobson) :
+    IsRegular M (List.ofFn (fun i ↦ (rs.get i) ^ f i)) := by
+
+  sorry
 
 --take regular
 lemma take_regular {rs : List R} (reg : IsRegular M rs) (k : ℕ) :
