@@ -122,12 +122,13 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
         have : Subsingleton (N ⟶ M) := ModuleCat.homEquiv.subsingleton
         exact (homEquiv₀_hom N M).subsingleton
       · have lt : i - 1 < n := by omega
-        have mono_g := mono_of_subsingleton (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁'
+        let g := (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i)))
+        have mono_g : Mono g := mono_of_subsingleton (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁'
           N reg.1.SMul_ShortComplex_exact (i - 1) i (by omega))
           (ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _) smul_lt' exist_reg' (i - 1) lt)
-        dsimp at mono_g
-        have mono_gk : Mono (AddCommGrp.ofHom
-          ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) := by
+        let gk := (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)))
+        have mono_gk : Mono gk := by
+
           sorry
         have zero_gk : AddCommGrp.ofHom
           ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)) = 0 := by
