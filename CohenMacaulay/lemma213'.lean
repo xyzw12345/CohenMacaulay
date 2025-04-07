@@ -15,7 +15,8 @@ variable {R : Type u} [CommRing R] {M N : ModuleCat.{max u v} R} {n : ℕ}
 local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
-lemma ext_hom_eq_zero_of_mem_ann {r : R} (mem_ann : r ∈ Module.annihilator R N) (n : ℕ) :
+lemma ext_hom_eq_zero_of_mem_ann {r : R} (mem_ann : r ∈ Module.annihilator R N)
+    (reg : IsSMulRegular M r)(n : ℕ) :
     (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N (add_zero (n + 1)))) = 0 := by
 
   sorry

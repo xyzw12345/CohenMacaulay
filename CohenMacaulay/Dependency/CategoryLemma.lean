@@ -18,12 +18,6 @@ theorem subsingleton_of_subsingleton_subsingleton (h0 : Subsingleton C.X₁)
   rw [show b = 0 from (@Subsingleton.elim _ h0 _ 0), map_zero] at hb
   exact hb.symm
 
-include h in
-theorem subsingleton_of_subsingleton_zero_hom (h0 : Subsingleton C.X₁) (hg : C.g = 0) :
-    Subsingleton C.X₂ := by
-
-  sorry
-
 section Exact3
 
 noncomputable def isoOfSubsingletonZeroMorphism {C1 C2 : ShortComplex AddCommGrp.{u}} (h1 : C1.Exact)

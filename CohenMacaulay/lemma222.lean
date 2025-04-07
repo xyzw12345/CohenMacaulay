@@ -4,7 +4,6 @@ import CohenMacaulay.lemma213'
 --import CohenMacaulay.FromPR.Ext0 --replace these two with above later
 --import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.SMulRegular
-import CohenMacaulay.Dependency.RegularSequence
 
 universe u v w
 
@@ -84,8 +83,36 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
   induction' n with n ih
   · simp
   · rintro M Mntr Mfin smul_lt ⟨rs, len, mem, reg⟩ i hi
+    have le_rad := Nsupp
+    rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_subset_zeroLocus_iff] at le_rad
+    match rs with
+    | [] =>
+      absurd len
+      simp
+    | a :: rs' =>
+      rcases le_rad (mem a List.mem_cons_self) with ⟨k, hk⟩
+      have kpos : k > 0 := by
+        by_contra h
+        simp only [Nat.eq_zero_of_not_pos h, pow_zero, Module.mem_annihilator, one_smul] at hk
+        absurd Nntr
+        exact not_nontrivial_iff_subsingleton.mpr (subsingleton_of_forall_eq 0 hk)
+      simp only [isRegular_cons_iff] at reg
+      have : IsSMulRegular M (a ^ k) := IsSMulRegular.pow k reg.1
+      let M' := (QuotSMulTop a M)
+      have le_smul : a • ⊤ ≤ I • (⊤ : Submodule R M) := by
+        rw [← Submodule.ideal_span_singleton_smul]
+        exact Submodule.smul_mono_left ((span_singleton_le_iff_mem I).mpr (mem a List.mem_cons_self))
+      have Qntr : Nontrivial M' :=
+        Submodule.Quotient.nontrivial_of_lt_top _ (gt_of_gt_of_ge smul_lt le_smul)
+      have exist_reg' : ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧
+        IsRegular (ModuleCat.of R M') rs := by
+        use rs'
+        simp only [List.length_cons, Nat.add_left_inj] at len
+        simp only [List.mem_cons, forall_eq_or_imp] at mem
+        exact ⟨len, mem.2, reg.2⟩
+      #check ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _)
 
-    sorry
+      sorry
 
 lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
