@@ -28,10 +28,19 @@ def CenterZ.ring_action (R : Type*) [CommRing R] : R →+* CenterZ (ModuleCat R)
   map_zero' := by aesop
   map_add' x y := by simp_rw [add_smul]; rfl
 
-def CenterZ.complex_map (A : Type*) : sorry := sorry
+section complex
 
+variable {ι : Type*} (c : ComplexShape ι) [Limits.HasZeroMorphisms C]
+
+#check CategoryTheory.Functor.mapHomologicalComplex
 #check CategoryTheory.NatTrans.hcomp
-#check CategoryTheory.Localization.Construction.natTransExtension
+
+def CenterZ.complex_map : CenterZ C →* CenterZ (HomologicalComplex C c) where
+  toFun α := sorry
+  map_one' := sorry
+  map_mul' := sorry
+
+end complex
 
 section localization
 
