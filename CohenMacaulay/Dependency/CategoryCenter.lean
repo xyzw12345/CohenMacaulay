@@ -36,7 +36,13 @@ variable {ι : Type*} (c : ComplexShape ι) [Limits.HasZeroMorphisms C]
 #check CategoryTheory.NatTrans.hcomp
 
 def CenterZ.complex_map : CenterZ C →* CenterZ (HomologicalComplex C c) where
-  toFun α := sorry
+  toFun α := {
+    app := fun X ↦ {
+      f := fun i ↦ α.app _
+      comm' := sorry
+    }
+    naturality := sorry
+  }
   map_one' := sorry
   map_mul' := sorry
 
