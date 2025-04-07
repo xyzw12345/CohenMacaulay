@@ -78,12 +78,31 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
 
 lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
-  [∀ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
-    Module.support R N ⊆ PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
-   --∀ i < n, Subsingleton (Ext (ModuleCat.of R (R⧸I)) M i),
+  [∀ N : ModuleCat R, (Nontrivial N ∧ Module.Finite R N ∧
+    Module.support R N ⊆ PrimeSpectrum.zeroLocus I) → ∀ i < n, Subsingleton (Ext N M i),
+   ∀ N : ModuleCat R, Nonempty (N ≃ₗ[R] R⧸I) → ∀ i < n, Subsingleton (Ext (ModuleCat.of R N) M i),
    ∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
     ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs
     ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h1 N exist_equiv i hi
+    let e := Classical.choice exist_equiv
+    have : Nontrivial (R⧸I) := by
+      apply Submodule.Quotient.nontrivial_of_lt_top _ (lt_top_iff_ne_top.mpr _)
+      by_contra eq
+      absurd smul_lt
+      simp [eq]
+    apply h1 N _ i hi
+    simp only [e.nontrivial, Module.Finite.equiv e.symm, LinearEquiv.support_eq e, true_and]
+    have : I = (I • (⊤ : Ideal R)) := by simp only [smul_eq_mul, mul_top]
+    rw [this, Module.support_quotient]
+    simp
+  tfae_have 2 → 3 := by
+    intro h2
+    --#check h2 (ModuleCat.of R (R⧸I))
 
-  sorry
+    sorry
+  tfae_have 3 → 4 := sorry
+  tfae_have 4 → 1 := sorry
+  tfae_finish
