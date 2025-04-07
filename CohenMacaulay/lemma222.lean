@@ -136,7 +136,7 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
       simpa [rs', len] using Nat.le_of_succ_le hi
     rw [this] at e
     have : Subsingleton (N →ₗ[R] M ⧸ ofList (List.take i rs') • (⊤ : Submodule R M)) := by
-
-      sorry
+      have : i < rs'.length := by simpa [rs', len] using hi
+      exact lemma_212_a (reg'.regular_mod_prev i this) (mem' _ (List.getElem_mem this))
     exact e.symm.subsingleton
   tfae_finish
