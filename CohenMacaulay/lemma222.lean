@@ -103,6 +103,6 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     --#check h2 (ModuleCat.of R (R⧸I))
 
     sorry
-  tfae_have 3 → 4 := sorry
+  tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
   tfae_have 4 → 1 := sorry
   tfae_finish
