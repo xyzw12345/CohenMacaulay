@@ -80,29 +80,39 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
   [∀ N : ModuleCat R, (Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N ⊆ PrimeSpectrum.zeroLocus I) → ∀ i < n, Subsingleton (Ext N M i),
-   ∀ N : ModuleCat R, Nonempty (N ≃ₗ[R] R⧸I) → ∀ i < n, Subsingleton (Ext (ModuleCat.of R N) M i),
+   ∀ i < n, Subsingleton (Ext (ModuleCat.of R (ULift (R⧸I))) M i),
    ∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
     ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs
     ].TFAE := by
-  tfae_have 1 → 2 := by
-    intro h1 N exist_equiv i hi
-    let e := Classical.choice exist_equiv
-    have : Nontrivial (R⧸I) := by
-      apply Submodule.Quotient.nontrivial_of_lt_top _ (lt_top_iff_ne_top.mpr _)
-      by_contra eq
-      absurd smul_lt
-      simp [eq]
-    apply h1 N _ i hi
-    simp only [e.nontrivial, Module.Finite.equiv e.symm, LinearEquiv.support_eq e, true_and]
+  have ntrQ : Nontrivial (R⧸I) := by
+    apply Submodule.Quotient.nontrivial_of_lt_top _ (lt_top_iff_ne_top.mpr _)
+    by_contra eq
+    absurd smul_lt
+    simp [eq]
+  have suppQ : Module.support R (R⧸I) = PrimeSpectrum.zeroLocus I := by
     have : I = (I • (⊤ : Ideal R)) := by simp only [smul_eq_mul, mul_top]
     rw [this, Module.support_quotient]
-    simp
+    have : Module.annihilator R R = ⊥ := by
+      rw [Module.annihilator_eq_bot]
+      exact (faithfulSMul_iff_algebraMap_injective R R).mpr fun ⦃a₁ a₂⦄ a ↦ a
+    simp [Module.support_eq_zeroLocus, this]
+  tfae_have 1 → 2 := by
+    intro h1 i hi
+    apply h1 (ModuleCat.of R (ULift (R⧸I))) _ i hi
+    simp only [ULift.nontrivial, Module.Finite.ulift, true_and]
+    rw [LinearEquiv.support_eq ULift.moduleEquiv, suppQ]
   tfae_have 2 → 3 := by
     intro h2
-    #check h2 (ModuleCat.of R (ULift.{v} (R⧸I)))
+    use (ModuleCat.of R (ULift.{v} (R⧸I)))
+    simp only [ULift.nontrivial, Module.Finite.ulift, true_and]
+    refine ⟨?_, h2⟩
+    rw [LinearEquiv.support_eq ULift.moduleEquiv, suppQ]
+  tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
+  tfae_have 4 → 1 := by
+    intro ⟨rs, len, mem, reg⟩ N ⟨Nntr, Nfin, Nsupp⟩ i hi
+    have Nsupp' := Nsupp
+    rw [Module.support_eq_zeroLocus] at Nsupp'
 
     sorry
-  tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
-  tfae_have 4 → 1 := sorry
   tfae_finish
