@@ -5,18 +5,18 @@ namespace CategoryTheory
 universe uC uC'
 variable (C : Type uC) [Category.{uC', uC} C]
 
-section CenterZ
+
 
 abbrev CenterZ : Type max uC uC' := End (𝟭 C)
 
-instance CenterZ.comm_monoid : CommMonoid (CenterZ C) where
+namespace CenterZ
+
+instance comm_monoid : CommMonoid (CenterZ C) where
   mul_comm := fun a b => NatTrans.id_comm b a
 
-instance CenterZ.comm_ring [Preadditive C] : CommRing (CenterZ C) where
+instance comm_ring [Preadditive C] : CommRing (CenterZ C) where
 
-end CenterZ
-
-def CenterZ.ring_action (R : Type*) [CommRing R] : R →+* CenterZ (ModuleCat R) where
+def ring_action (R : Type*) [CommRing R] : R →+* CenterZ (ModuleCat R) where
   toFun := fun r => {
     app := fun M => ModuleCat.ofHom (r • LinearMap.id)
     naturality := by aesop
@@ -32,7 +32,7 @@ section complex
 
 variable {ι : Type*} (c : ComplexShape ι) [Limits.HasZeroMorphisms C]
 
-def CenterZ.complex_map : CenterZ C →* CenterZ (HomologicalComplex C c) where
+def complex_map : CenterZ C →* CenterZ (HomologicalComplex C c) where
   toFun α := NatTrans.mapHomologicalComplex α c
   map_one' := by aesop
   map_mul' := by aesop
@@ -43,7 +43,7 @@ section localization
 
 variable {C} (W : MorphismProperty C)
 
-def CenterZ.localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
+def localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
   toFun α := by
     apply CategoryTheory.Localization.Construction.natTransExtension
     rw [CategoryTheory.Functor.comp_id, ← CategoryTheory.Functor.id_comp W.Q]
@@ -58,3 +58,5 @@ def CenterZ.localizationMonoidHom : CenterZ C →* CenterZ W.Localization where
     rfl
 
 end localization
+
+end CenterZ
