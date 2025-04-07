@@ -111,9 +111,32 @@ lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
   tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
   tfae_have 4 → 1 := by
     intro ⟨rs, len, mem, reg⟩ N ⟨Nntr, Nfin, Nsupp⟩ i hi
-    have Nsupp' := Nsupp
-    rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_subset_zeroLocus_iff] at Nsupp'
+    have le_rad := Nsupp
+    rw [Module.support_eq_zeroLocus, PrimeSpectrum.zeroLocus_subset_zeroLocus_iff] at le_rad
+    have : ∀ r ∈ rs, ∃ k, r ^ k ∈ Module.annihilator R N :=
+      fun r hr ↦ le_rad (mem r hr)
+    choose pow hpow using this
+    let rs' : List R := List.ofFn (fun i ↦ (rs.get i) ^ (pow _ (rs.get_mem i)))
+    have mem' : ∀ x ∈ rs', x ∈ Module.annihilator R N := by
+      intro x hx
+      rcases List.mem_iff_get.mp hx with ⟨t, ht⟩
+      simp only [← ht, List.get_eq_getElem, List.getElem_ofFn, rs']
+      apply hpow
+    have mem'' : ∀ x ∈ (rs'.take i), x ∈ Module.annihilator R N := by
+      intro x hx
+      exact mem' x (List.mem_of_mem_take hx)
+    have reg' : IsRegular M rs' := by
 
+      sorry
+    have reg'' : IsRegular M (rs'.take i) := by
 
-    sorry
+      sorry
+    let e := lemma_213 reg''.toIsWeaklyRegular mem''
+    have : (List.take i rs').length = i := by
+      simpa [rs', len] using Nat.le_of_succ_le hi
+    rw [this] at e
+    have : Subsingleton (N →ₗ[R] M ⧸ ofList (List.take i rs') • (⊤ : Submodule R M)) := by
+
+      sorry
+    exact e.symm.subsingleton
   tfae_finish
