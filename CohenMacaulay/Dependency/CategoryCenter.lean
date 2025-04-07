@@ -20,10 +20,12 @@ def CenterZ.ring_action (R : Type*) [CommRing R] : R →+* CenterZ (ModuleCat R)
     app := fun M => ModuleCat.ofHom (r • LinearMap.id)
     naturality := by aesop
   }
-  map_one' := sorry
-  map_mul' := sorry
-  map_zero' := sorry
-  map_add' := sorry
+  map_one' := by aesop
+  map_mul' x y := by
+    rw [NatTrans.ext_iff]; ext M f
+    simpa using (show (x * y) • f = x • (y • f) from (smul_smul ..).symm)
+  map_zero' := by aesop
+  map_add' x y := by simp_rw [add_smul]; rfl
 
 def CenterZ.complex_map (A : Type*) : sorry := sorry
 
