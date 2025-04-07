@@ -44,7 +44,7 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
 
 -- set_option diagnostics true in
 open Pointwise in
-set_option maxHeartbeats 1000000 in
+set_option maxHeartbeats 400000 in
 noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
   generalize h' : rs.length = n
   induction' n with n hn generalizing M rs
@@ -102,8 +102,9 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₃' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
         (Iso.refl _) (Iso.refl _) (by aesop_cat) h_left_subsingleton
-      dsimp [SMul_ShortComplex, Ext.postcomp]
-      ext
+      dsimp only
+      -- dsimp [SMul_ShortComplex, Ext.postcomp]
+      -- ext
       -- simp only [AddCommGrp.hom_comp, AddCommGrp.hom_ofHom, AddCommGrp.hom_zero,
       --   AddMonoidHom.coe_comp, Function.comp_apply, AddMonoidHom.flip_apply,
       --   Ext.bilinearComp_apply_apply, AddMonoidHom.zero_apply, id_eq]
