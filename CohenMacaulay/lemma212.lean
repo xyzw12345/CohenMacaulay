@@ -153,8 +153,6 @@ lemma lemma_212_a {r : R} (reg : IsSMulRegular M r)
     rw [smul_zero, ← map_smul, Module.mem_annihilator.mp mem_ann x, map_zero]
   simpa using reg this
 
-#help tactic nontriviality
-
 lemma lemma_212_b_nontrivial [IsNoetherianRing R] [Module.Finite R M] [Module.Finite R N]
     [Nontrivial M] (hom0 : Subsingleton (N →ₗ[R] M)) :
     ∃ r ∈ Module.annihilator R N, IsSMulRegular M r := by

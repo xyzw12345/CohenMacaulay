@@ -18,6 +18,22 @@ theorem subsingleton_of_subsingleton_subsingleton (h0 : Subsingleton C.X₁)
   rw [show b = 0 from (@Subsingleton.elim _ h0 _ 0), map_zero] at hb
   exact hb.symm
 
+include h in
+theorem mono_of_subsingleton (h0 : Subsingleton C.X₁) : Mono C.g := by
+  rw [CategoryTheory.ShortComplex.ab_exact_iff] at h
+  rw [AddCommGrp.mono_iff_ker_eq_bot, eq_bot_iff]
+  intro x hx
+  rcases h x hx with ⟨y, hy⟩
+  simp only [Subsingleton.eq_zero y, map_zero] at hy
+  simp [← hy]
+
+lemma subsingleton_of_mono {X Y : AddCommGrp.{u}} {f : X ⟶ Y} (mono : Mono f)
+    (eq0 : f = 0) : Subsingleton X := by
+  apply subsingleton_of_forall_eq 0
+  intro x
+  apply (AddCommGrp.mono_iff_injective f).mp mono
+  simp [eq0]
+
 section Exact3
 
 noncomputable def isoOfSubsingletonZeroMorphism {C1 C2 : ShortComplex AddCommGrp.{u}} (h1 : C1.Exact)

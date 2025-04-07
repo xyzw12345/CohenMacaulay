@@ -75,6 +75,7 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       true_and, isRegular_cons_iff]
     exact ⟨mem, hxk, reg⟩
 
+set_option maxHeartbeats 500000 in
 lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
     (Nfin : Module.Finite R N) (Nsupp : Module.support R N ⊆ PrimeSpectrum.zeroLocus I) :
     ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
@@ -97,22 +98,38 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
         absurd Nntr
         exact not_nontrivial_iff_subsingleton.mpr (subsingleton_of_forall_eq 0 hk)
       simp only [isRegular_cons_iff] at reg
-      have : IsSMulRegular M (a ^ k) := IsSMulRegular.pow k reg.1
+      have reg_pow : IsSMulRegular M (a ^ k) := IsSMulRegular.pow k reg.1
       let M' := (QuotSMulTop a M)
       have le_smul : a • ⊤ ≤ I • (⊤ : Submodule R M) := by
         rw [← Submodule.ideal_span_singleton_smul]
         exact Submodule.smul_mono_left ((span_singleton_le_iff_mem I).mpr (mem a List.mem_cons_self))
       have Qntr : Nontrivial M' :=
         Submodule.Quotient.nontrivial_of_lt_top _ (gt_of_gt_of_ge smul_lt le_smul)
+      have smul_lt' : I • (⊤ : Submodule R M') < ⊤ := by
+        sorry
       have exist_reg' : ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧
         IsRegular (ModuleCat.of R M') rs := by
         use rs'
         simp only [List.length_cons, Nat.add_left_inj] at len
         simp only [List.mem_cons, forall_eq_or_imp] at mem
         exact ⟨len, mem.2, reg.2⟩
-      #check ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _)
-
-      sorry
+      by_cases eq0 : i = 0
+      · rw [eq0]
+        have : Subsingleton (N →ₗ[R] M) := lemma_212_a (IsSMulRegular.pow k reg.1) hk
+        have : Subsingleton (N ⟶ M) := ModuleCat.homEquiv.subsingleton
+        exact (homEquiv₀_hom N M).subsingleton
+      · have lt : i - 1 < n := by omega
+        have mono_g := mono_of_subsingleton (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁'
+          N reg.1.SMul_ShortComplex_exact (i - 1) i (by omega))
+          (ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _) smul_lt' exist_reg' (i - 1) lt)
+        dsimp at mono_g
+        have mono_gk : Mono (AddCommGrp.ofHom
+          ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) := by
+          sorry
+        have zero_gk : AddCommGrp.ofHom
+          ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)) = 0 := by
+          exact ext_hom_eq_zero_of_mem_ann hk (IsSMulRegular.pow k reg.1) i
+        exact subsingleton_of_mono mono_gk zero_gk
 
 lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
