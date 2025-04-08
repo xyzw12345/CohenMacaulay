@@ -30,6 +30,7 @@ variable {C : Type uC} [Category.{uC', uC} C] [Limits.HasZeroObject C] [Limits.H
 variable {ι : Type*} (c : ComplexShape ι) (j : ι) [DecidableEq ι]
 
 open ZeroObject in
+@[simp]
 def HomologicalComplex.singleMapHomologicalComplexNatId : (HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j) = Iso.refl (HomologicalComplex.single C c j) := by
   ext x i
   if h : i = j then
@@ -55,6 +56,7 @@ variable {D : Type uD} [Category.{uD', uD} D] [Limits.HasZeroObject D] [Limits.H
 #check CatCenter.localizationRingMorphism
 #check HomologicalComplex.singleMapHomologicalComplex
 
+@[simp]
 noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : C ⥤ D) [F.PreservesZeroMorphisms] [G.PreservesZeroMorphisms] (α : F ⟶ G) :
     (HomologicalComplex.singleMapHomologicalComplex F c j).hom ≫ (CategoryTheory.whiskerRight α (HomologicalComplex.single D c j))
     = CategoryTheory.whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ (HomologicalComplex.singleMapHomologicalComplex G c j).hom := by
@@ -68,8 +70,23 @@ noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : 
   else
     simp[h]
 
--- variable (α : (𝟭 C) ⟶ (𝟭 C))
--- #check HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+variable (α : (𝟭 C) ⟶ (𝟭 C))
+#check HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+def HomologicalComplex.singleMapCenter : whiskerRight α (HomologicalComplex.single C c j) =
+  whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+    have l := HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+    simp only [HomologicalComplex.singleMapHomologicalComplexNatId, Iso.refl_hom] at l
+    have : 𝟙 (HomologicalComplex.single C c j) ≫ whiskerRight α (HomologicalComplex.single C c j) = whiskerRight α (HomologicalComplex.single C c j) := by
+      exact Category.id_comp (whiskerRight α (HomologicalComplex.single C c j))
+    rw [this] at l
+    have : whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ 𝟙 (HomologicalComplex.single C c j) = whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+      exact
+        Category.comp_id
+          (whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c))
+    rw [this] at l
+    exact l
+
+
 -- #check HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j
 -- def foo : sorry := by
 --   -- have := HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j
