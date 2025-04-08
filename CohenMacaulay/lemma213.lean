@@ -3,7 +3,6 @@ import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
-import CohenMacaulay.Dependency.CategoryCenter
 import CohenMacaulay.Dependency.ExtLemma
 import Mathlib
 
@@ -100,7 +99,7 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
           apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
       refine ih.trans ?_
       have h4 : IsSMulRegular M r := ((isWeaklyRegular_cons_iff M r rs).mp hr).1
-      have : (CenterZ.ring_action R r).app N = 0 := by
+      have : (Linear.toCatCenter R (ModuleCat R) r).app N = 0 := by
         show ModuleCat.ofHom (r • (LinearMap.id (R := R) (M := N))) = 0
         have : r ∈ Module.annihilator R N := by apply h; exact List.mem_cons_self
         ext x; simpa using (Module.mem_annihilator.mp this x)
@@ -111,5 +110,5 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
       dsimp only
       suffices ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N _) = 0 by
         exact congrArg AddCommGrp.ofHom this
-      apply (CategoryTheory.homCommute M N (CenterZ.ring_action R r) (n + 1)).trans ?_
+      apply (CategoryTheory.homCommute M N (Linear.toCatCenter R (ModuleCat R) r) (n + 1)).trans ?_
       simp [this]
