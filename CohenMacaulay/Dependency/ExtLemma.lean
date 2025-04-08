@@ -21,6 +21,73 @@ def CatCenter.complexRingMorphism [Preadditive C] : CatCenter C →+* CatCenter 
 
 end complex
 
+section singleFunctor
+#check CochainComplex.singleFunctor
+#check NatTrans.mapHomologicalComplex
+#check HomologicalComplex.single
+
+universe uC uC' uD uD' v
+variable {C : Type uC} [Category.{uC', uC} C] [Limits.HasZeroObject C] [Limits.HasZeroMorphisms C]
+variable {D : Type uD} [Category.{uD', uD} D] [Limits.HasZeroObject D] [Limits.HasZeroMorphisms D]
+variable {ι : Type*} (c : ComplexShape ι) (j : ι) [DecidableEq ι]
+
+#check HomologicalComplex.single C c j
+#check NatTrans.mapHomologicalComplex
+
+open ZeroObject in
+noncomputable def HomologicalComplex.singleMapHomologicalComplexeq.X (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) (x : C) :
+    ((HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c).obj x).X
+    = ((F ⋙ HomologicalComplex.single D c j).obj x).X := by
+  unfold HomologicalComplex.single
+  ext i
+  if h : i = j then
+    simp[h]
+  else
+    simp[h]
+    exact F₀
+
+
+#check HomologicalComplex.singleMapHomologicalComplexeq.X
+#check HomologicalComplex
+
+open ZeroObject in
+noncomputable def HomologicalComplex.singleMapHomologicalComplexeq.d (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) (x : C) :
+    ((HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c).obj x).d
+    = fun i i' => eqToHom (congrFun ((HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀) x) i)
+    ≫ ((F ⋙ HomologicalComplex.single D c j).obj x).d i i' ≫
+    eqToHom (congrFun ((HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀) x) i').symm := by
+  ext i i'
+  if h : i = j then
+    simp[h]
+  else
+    simp[h]
+
+-- Requires F.obj 0 = 0, e.g. id_C
+open ZeroObject in
+noncomputable def HomologicalComplex.singleMapHomologicalComplexeq (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) :
+    HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c
+    = F ⋙ HomologicalComplex.single D c j := by
+  apply Functor.ext
+  unfold HomologicalComplex.single
+  intro x y f
+  ext i
+  if h : i = j then
+    simp[h]
+    sorry
+  else
+    sorry
+  intro x
+
+  have l₁ := HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀ x
+  have l₂ := HomologicalComplex.singleMapHomologicalComplexeq.d c j F F₀ x
+
+  sorry
+  -- exact HomologicalComplex.singleMapHomologicalComplex F c j
+
+
+  -- exact HomologicalComplex.singleMapHomologicalComplex F c j
+
+end singleFunctor
 section Ext
 
 universe uC uC' uD uD' v
@@ -63,6 +130,7 @@ theorem homCommute (M : C) (N : C) (α : CatCenter C) (n : ℕ) :
   -- have : ∀ h : SmallHom.{v} W X Y, (SmallShiftedHom.shift h 0 ↑n _ : SmallHom.{v} W X Y) = h := by
   --   sorry
   show (∀ (h : SmallHom.{v} W X Y), h.comp _ = SmallHom.comp _ _)
+  sorry
 
   -- apply (SmallHom.commute_iff W X Y).mpr
   -- conv => ext h; rw [eq_comm]; rhs; erw [AddMonoidHom.flip_apply]
