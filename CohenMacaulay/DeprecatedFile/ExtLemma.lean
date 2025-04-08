@@ -25,71 +25,38 @@ section singleFunctor
 #check CochainComplex.singleFunctor
 #check NatTrans.mapHomologicalComplex
 #check HomologicalComplex.single
-
-universe uC uC' uD uD' v
+universe uC uC'
 variable {C : Type uC} [Category.{uC', uC} C] [Limits.HasZeroObject C] [Limits.HasZeroMorphisms C]
-variable {D : Type uD} [Category.{uD', uD} D] [Limits.HasZeroObject D] [Limits.HasZeroMorphisms D]
 variable {ι : Type*} (c : ComplexShape ι) (j : ι) [DecidableEq ι]
+
+open ZeroObject in
+@[simp]
+def HomologicalComplex.singleMapHomologicalComplexNatId : (HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j) = Iso.refl (HomologicalComplex.single C c j) := by
+  ext x i
+  if h : i = j then
+    unfold HomologicalComplex.singleMapHomologicalComplex HomologicalComplex.single
+    simp[h]
+  else
+    unfold HomologicalComplex.singleMapHomologicalComplex HomologicalComplex.single
+    simp[h]
+    have l₁ : (if i = j then x else 0) = 0 := by simp[h]
+    have l₂ (a : C) (e : a = 0) : 𝟙 a = 0 := by
+      rw[e]
+      exact Limits.id_zero
+    exact
+      Eq.symm
+        (eq_of_comp_right_eq fun {X} h ↦
+          congrArg (CategoryStruct.comp h) (l₂ (if i = j then x else 0) l₁))
+
+universe uD uD' v
+variable {D : Type uD} [Category.{uD', uD} D] [Limits.HasZeroObject D] [Limits.HasZeroMorphisms D]
 
 #check HomologicalComplex.single C c j
 #check NatTrans.mapHomologicalComplex
-
--- open ZeroObject in
--- noncomputable def HomologicalComplex.singleMapHomologicalComplexeq.X (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) (x : C) :
---     ((HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c).obj x).X
---     = ((F ⋙ HomologicalComplex.single D c j).obj x).X := by
---   unfold HomologicalComplex.single
---   ext i
---   if h : i = j then
---     simp[h]
---   else
---     simp[h]
---     exact F₀
-
-
--- #check HomologicalComplex.singleMapHomologicalComplexeq.X
--- #check HomologicalComplex
-
--- open ZeroObject in
--- noncomputable def HomologicalComplex.singleMapHomologicalComplexeq.d (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) (x : C) :
---     ((HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c).obj x).d
---     = fun i i' => eqToHom (congrFun ((HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀) x) i)
---     ≫ ((F ⋙ HomologicalComplex.single D c j).obj x).d i i' ≫
---     eqToHom (congrFun ((HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀) x) i').symm := by
---   ext i i'
---   if h : i = j then
---     simp[h]
---   else
---     simp[h]
-
--- -- Requires F.obj 0 = 0, e.g. id_C
--- open ZeroObject in
--- noncomputable def HomologicalComplex.singleMapHomologicalComplexeq (F : C ⥤ D) [F.PreservesZeroMorphisms] (F₀ : F.obj 0 = 0) :
---     HomologicalComplex.single C c j ⋙ Functor.mapHomologicalComplex F c
---     = F ⋙ HomologicalComplex.single D c j := by
---   #check HomologicalComplex.singleMapHomologicalComplex F c j
---   apply Functor.ext
---   unfold HomologicalComplex.single
---   intro x y f
---   ext i
---   if h : i = j then
---     simp[h]
---     sorry
---   else
---     sorry
---   intro x
-
---   have l₁ := HomologicalComplex.singleMapHomologicalComplexeq.X c j F F₀ x
---   have l₂ := HomologicalComplex.singleMapHomologicalComplexeq.d c j F F₀ x
-
---   sorry
---   -- exact HomologicalComplex.singleMapHomologicalComplex F c j
-
-
---   -- exact HomologicalComplex.singleMapHomologicalComplex F c j
 #check CatCenter.localizationRingMorphism
 #check HomologicalComplex.singleMapHomologicalComplex
--- open ZeroObject in
+
+@[simp]
 noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : C ⥤ D) [F.PreservesZeroMorphisms] [G.PreservesZeroMorphisms] (α : F ⟶ G) :
     (HomologicalComplex.singleMapHomologicalComplex F c j).hom ≫ (CategoryTheory.whiskerRight α (HomologicalComplex.single D c j))
     = CategoryTheory.whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ (HomologicalComplex.singleMapHomologicalComplex G c j).hom := by
@@ -97,17 +64,42 @@ noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : 
   unfold HomologicalComplex.singleMapHomologicalComplex HomologicalComplex.single
   if h : i = j then
     simp[h]
-    sorry
+    rw [← CategoryTheory.comp_eqToHom_iff, Category.assoc, Category.assoc, CategoryTheory.eqToHom_trans]
+    exact Eq.symm (dcongr_arg α.app (by simp[h]))
+    simp[h]
   else
     simp[h]
 
-  -- #check CategoryTheory.whiskerRight α (HomologicalComplex.single D c j)
-  -- #check (HomologicalComplex.singleMapHomologicalComplex F c j).hom ≫ (CategoryTheory.whiskerRight α (HomologicalComplex.single D c j))
-  -- #check CategoryTheory.whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ (HomologicalComplex.singleMapHomologicalComplex G c j).hom
-  -- #check (HomologicalComplex.singleMapHomologicalComplex G c j).hom
+variable (α : (𝟭 C) ⟶ (𝟭 C))
+#check HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+def HomologicalComplex.singleMapCenter : whiskerRight α (HomologicalComplex.single C c j) =
+  whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+    have l := HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+    simp only [HomologicalComplex.singleMapHomologicalComplexNatId, Iso.refl_hom] at l
+    have : 𝟙 (HomologicalComplex.single C c j) ≫ whiskerRight α (HomologicalComplex.single C c j) = whiskerRight α (HomologicalComplex.single C c j) := by
+      exact Category.id_comp (whiskerRight α (HomologicalComplex.single C c j))
+    rw [this] at l
+    have : whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ 𝟙 (HomologicalComplex.single C c j) = whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+      exact
+        Category.comp_id
+          (whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c))
+    rw [this] at l
+    exact l
 
-  -- have : F.mapHomologicalComplex c ⟶ G.mapHomologicalComplex c := NatTrans.mapHomologicalComplex α c
-  -- sorry
+
+-- #check HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j
+-- def foo : sorry := by
+--   -- have := HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j
+--   -- simp only at this
+--   have : (HomologicalComplex.singleMapHomologicalComplex (𝟭 C) c j).hom = 𝟙 (HomologicalComplex.single C c j) := by
+--     ext x i
+
+--     sorry
+--   have := HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+--   simp only at this
+
+--   sorry
+
 
 end singleFunctor
 section Ext
@@ -135,7 +127,7 @@ end SmallHom
 variable [Abelian C] [HasExt.{v} C]
 
 open Abelian Localization in
-set_option maxHeartbeats 2000000 in
+-- set_option maxHeartbeats 2000000 in
 theorem homCommute (M : C) (N : C) (α : CatCenter C) (n : ℕ) :
     (Ext.mk₀ (α.app M)).postcomp N (add_zero n) = (Ext.mk₀ (α.app N)).precomp M (zero_add n) := by
   apply AddMonoidHom.ext
