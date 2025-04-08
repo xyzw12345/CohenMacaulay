@@ -1,5 +1,6 @@
 import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.Ext0
+import CohenMacaulay.FromPR.Projective
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.FromPR.ExtLinear
@@ -15,11 +16,11 @@ lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [Com
 universe u v w
 
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian Pointwise
-variable {R : Type u} [CommRing R] {M N : ModuleCat.{max u v} R} {n : ℕ}
-  [UnivLE.{max u v, w}]
+variable {R : Type u} [CommRing R] [Small.{v} R] {M N : ModuleCat.{v} R} {n : ℕ}
+  [UnivLE.{v, w}]
 
-local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
-  CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
+local instance : CategoryTheory.HasExt.{w} (ModuleCat.{v} R) :=
+  CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{v} R)
 
 set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 40000 in

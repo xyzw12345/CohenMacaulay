@@ -10,19 +10,18 @@ universe u v w
 open IsLocalRing LinearMap
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian
 
-variable {R : Type u} [CommRing R]
-   [UnivLE.{max u v, w}]
+variable {R : Type u} [CommRing R] [Small.{v} R] [UnivLE.{v, w}]
 
-local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
-  --CategoryTheory.HasExt.standard (ModuleCat.{max u v} R)
-  CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
+local instance : CategoryTheory.HasExt.{w} (ModuleCat.{v} R) :=
+  --CategoryTheory.HasExt.standard (ModuleCat.{v} R)
+  CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{v} R)
 
 set_option linter.unusedTactic false
 
 open Pointwise
 
-lemma lemma222_3_to_4 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
-    I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
+lemma lemma222_3_to_4 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat.{v} R, Nontrivial M → Module.Finite R M →
+    I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat.{v} R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i)) →
     ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs := by
   induction' n with n ih
@@ -73,7 +72,7 @@ lemma lemma222_3_to_4 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) : ∀ M : Mod
     exact ⟨mem, hxk, reg⟩
 
 set_option maxHeartbeats 250000 in
-lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat R}
+lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat.{v} R}
     (f_mono : Mono (AddCommGrp.ofHom
       ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i)))) :
     Mono (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) := by
@@ -96,9 +95,9 @@ lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat R
       exact CategoryTheory.mono_comp' (ih (Nat.zero_lt_of_ne_zero eq0)) f_mono
 
 set_option maxHeartbeats 1000000 in
-lemma lemma222_4_to_1 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
+lemma lemma222_4_to_1 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (N : ModuleCat.{v} R) (Nntr : Nontrivial N)
     (Nfin : Module.Finite R N) (Nsupp : Module.support R N ⊆ PrimeSpectrum.zeroLocus I) :
-    ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
+    ∀ M : ModuleCat.{v} R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
     (∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs) →
     ∀ i < n, Subsingleton (Ext N M i) := by
   induction' n with n ih
@@ -154,21 +153,21 @@ lemma lemma222_4_to_1 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (N : ModuleCa
         have zero_gk : gk = 0 := ext_hom_eq_zero_of_mem_ann hk i
         exact subsingleton_of_mono_zero mono_gk zero_gk
 
-lemma lemma222 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
-    (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
-  [∀ N : ModuleCat R, (Nontrivial N ∧ Module.Finite R N ∧
+lemma lemma222 [IsNoetherianRing R] (I : Ideal R) [Small.{v} (R ⧸ I)] (n : ℕ) (M : ModuleCat.{v} R)
+    (Mntr : Nontrivial M) (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
+  [∀ N : ModuleCat.{v} R, (Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N ⊆ PrimeSpectrum.zeroLocus I) → ∀ i < n, Subsingleton (Ext N M i),
-   ∀ i < n, Subsingleton (Ext (ModuleCat.of R (ULift (R⧸I))) M i),
+   ∀ i < n, Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i),
    ∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i),
     ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ RingTheory.Sequence.IsRegular M rs
     ].TFAE := by
-  have ntrQ : Nontrivial (R⧸I) := by
+  have ntrQ : Nontrivial (R ⧸ I) := by
     apply Submodule.Quotient.nontrivial_of_lt_top _ (lt_top_iff_ne_top.mpr _)
     by_contra eq
     absurd smul_lt
     simp [eq]
-  have suppQ : Module.support R (R⧸I) = PrimeSpectrum.zeroLocus I := by
+  have suppQ : Module.support R (R ⧸ I) = PrimeSpectrum.zeroLocus I := by
     have : I = (I • (⊤ : Ideal R)) := by simp only [smul_eq_mul, mul_top]
     rw [this, Module.support_quotient]
     have : Module.annihilator R R = ⊥ := by
@@ -177,15 +176,16 @@ lemma lemma222 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (M : ModuleCat R) (M
     simp [Module.support_eq_zeroLocus, this]
   tfae_have 1 → 2 := by
     intro h1 i hi
-    apply h1 (ModuleCat.of R (ULift (R⧸I))) _ i hi
-    simp only [ULift.nontrivial, Module.Finite.ulift, true_and]
-    rw [LinearEquiv.support_eq ULift.moduleEquiv, suppQ]
+    apply h1 (ModuleCat.of R (Shrink.{v} (R ⧸ I))) _ i hi
+    simp_rw [instNontrivialShrink, Module.Finite.equiv (Shrink.linearEquiv (R ⧸ I) R).symm]
+    rw [true_and, true_and, (Shrink.linearEquiv _ R).support_eq, suppQ]
   tfae_have 2 → 3 := by
     intro h2
-    use (ModuleCat.of R (ULift.{v} (R⧸I)))
-    simp only [ULift.nontrivial, Module.Finite.ulift, true_and]
+    use (ModuleCat.of R (Shrink.{v} (R ⧸ I)))
+    simp only [instNontrivialShrink, Module.Finite.equiv (Shrink.linearEquiv (R ⧸ I) R).symm,
+      true_and]
     refine ⟨?_, h2⟩
-    rw [LinearEquiv.support_eq ULift.moduleEquiv, suppQ]
+    rw [(Shrink.linearEquiv _ R).support_eq, suppQ]
   tfae_have 3 → 4 := lemma222_3_to_4 I n M Mntr Mfin smul_lt
   tfae_have 4 → 1 := by
     intro h4 N ⟨Nntr, Nfin, Nsupp⟩ i hi
