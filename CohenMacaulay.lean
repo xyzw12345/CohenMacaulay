@@ -13,6 +13,5 @@ import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.RelSeries
 import CohenMacaulay.HomLoc_exchange
 import CohenMacaulay.lemma212
-import CohenMacaulay.lemma213
 import CohenMacaulay.lemma213'
 import CohenMacaulay.lemma222
