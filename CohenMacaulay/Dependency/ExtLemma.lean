@@ -89,7 +89,7 @@ variable {ι : Type*} (c : ComplexShape ι) (j : ι) [DecidableEq ι]
 --   -- exact HomologicalComplex.singleMapHomologicalComplex F c j
 #check CatCenter.localizationRingMorphism
 #check HomologicalComplex.singleMapHomologicalComplex
--- open ZeroObject in
+
 noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : C ⥤ D) [F.PreservesZeroMorphisms] [G.PreservesZeroMorphisms] (α : F ⟶ G) :
     (HomologicalComplex.singleMapHomologicalComplex F c j).hom ≫ (CategoryTheory.whiskerRight α (HomologicalComplex.single D c j))
     = CategoryTheory.whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ (HomologicalComplex.singleMapHomologicalComplex G c j).hom := by
@@ -97,17 +97,12 @@ noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : 
   unfold HomologicalComplex.singleMapHomologicalComplex HomologicalComplex.single
   if h : i = j then
     simp[h]
-    sorry
+    rw [← CategoryTheory.comp_eqToHom_iff, Category.assoc, Category.assoc, CategoryTheory.eqToHom_trans]
+    exact Eq.symm (dcongr_arg α.app (by simp[h]))
+    simp[h]
   else
     simp[h]
 
-  -- #check CategoryTheory.whiskerRight α (HomologicalComplex.single D c j)
-  -- #check (HomologicalComplex.singleMapHomologicalComplex F c j).hom ≫ (CategoryTheory.whiskerRight α (HomologicalComplex.single D c j))
-  -- #check CategoryTheory.whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ (HomologicalComplex.singleMapHomologicalComplex G c j).hom
-  -- #check (HomologicalComplex.singleMapHomologicalComplex G c j).hom
-
-  -- have : F.mapHomologicalComplex c ⟶ G.mapHomologicalComplex c := NatTrans.mapHomologicalComplex α c
-  -- sorry
 
 end singleFunctor
 section Ext
@@ -135,7 +130,7 @@ end SmallHom
 variable [Abelian C] [HasExt.{v} C]
 
 open Abelian Localization in
-set_option maxHeartbeats 2000000 in
+-- set_option maxHeartbeats 2000000 in
 theorem homCommute (M : C) (N : C) (α : CatCenter C) (n : ℕ) :
     (Ext.mk₀ (α.app M)).postcomp N (add_zero n) = (Ext.mk₀ (α.app N)).precomp M (zero_add n) := by
   apply AddMonoidHom.ext
