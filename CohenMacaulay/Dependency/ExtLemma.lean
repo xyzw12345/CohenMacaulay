@@ -30,11 +30,12 @@ section SmallHom
 
 open CategoryTheory Localization
 variable {D : Type uD} [Category.{uD', uD} D]
-variable {W : MorphismProperty C} {L : C ⥤ D} [L.IsLocalization W]
-variable {X Y : C} [HasSmallLocalizedHom.{v} W X X] [HasSmallLocalizedHom.{v} W Y Y] [HasSmallLocalizedHom.{v} W X Y]
+variable (W : MorphismProperty C) (X Y : C) [HasSmallLocalizedHom.{v} W X X]
+variable [HasSmallLocalizedHom.{v} W Y Y] [HasSmallLocalizedHom.{v} W X Y]
 
 private theorem SmallHom.commute_iff {f : X ⟶ X} {g : Y ⟶ Y} :
-  (∀ (h : SmallHom.{v} W X Y), (SmallHom.mk.{v} W f).comp h = h.comp (SmallHom.mk.{v} W g)) ↔ (∀ (h : X ⟶ Y), f ≫ h = h ≫ g) := by
+  (∀ (h : SmallHom.{v} W X Y), h.comp (SmallHom.mk.{v} W g) = (SmallHom.mk.{v} W f).comp h) ↔
+  (∀ (h : X ⟶ Y), h ≫ g = f ≫ h) := by
   sorry
 
 -- private theorem CategoryTheory.Localization.SmallHom
@@ -44,17 +45,33 @@ end SmallHom
 
 variable [Abelian C] [HasExt.{v} C]
 
-open Abelian in
+open Abelian Localization in
 set_option maxHeartbeats 2000000 in
 theorem homCommute (M : C) (N : C) (α : CatCenter C) (n : ℕ) :
     (Ext.mk₀ (α.app M)).postcomp N (add_zero n) = (Ext.mk₀ (α.app N)).precomp M (zero_add n) := by
   apply AddMonoidHom.ext
-  unfold Abelian.Ext Ext.mk₀ Ext.precomp Ext.postcomp
-  unfold Ext.bilinearComp Ext.comp Localization.SmallShiftedHom
-  unfold Localization.SmallShiftedHom.comp Localization.SmallShiftedHom.mk₀
-  unfold Localization.SmallShiftedHom.shift
+  unfold Ext.mk₀ Ext.precomp Ext.postcomp
+  unfold Ext.bilinearComp Ext.comp
   simp
-  apply SmallHom.commute_iff.mpr
+  -- unfold Abelian.Ext Localization.SmallShiftedHom
+  -- unfold Localization.SmallShiftedHom.comp Localization.SmallShiftedHom.mk₀
+  -- unfold Localization.SmallShiftedHom.shift
+  let W := (HomologicalComplex.quasiIso C (ComplexShape.up ℤ))
+  let X := (CochainComplex.singleFunctor C 0).obj N
+  let Y := (shiftFunctor (HomologicalComplex C (ComplexShape.up ℤ)) (n : ℤ)).obj
+    ((CochainComplex.singleFunctor C 0).obj M)
+  -- have : ∀ h : SmallHom.{v} W X Y, (SmallShiftedHom.shift h 0 ↑n _ : SmallHom.{v} W X Y) = h := by
+  --   sorry
+  show (∀ (h : SmallHom.{v} W X Y), h.comp _ = SmallHom.comp _ _)
+
+  -- apply (SmallHom.commute_iff W X Y).mpr
+  -- conv => ext h; rw [eq_comm]; rhs; erw [AddMonoidHom.flip_apply]
+  -- conv => ext h; lhs; rw [AddMonoidHom.mk'_apply]; erw [AddMonoidHom.mk'_apply]
+
+  --
+  --
+  --
+  -- apply (SmallHom.commute_iff _ _ _).mpr
 
   -- (Ext.mk₀ (α.app M)).postcomp N (add_zero n) =
   --   (Ext.mk₀ (α.app N)).precomp M (zero_add n) := by
