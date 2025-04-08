@@ -1,18 +1,11 @@
 import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.Ext0
 import CohenMacaulay.lemma212
+import CohenMacaulay.lemma213'
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.ExtLemma
 import Mathlib
-
--- set_option maxHeartbeats 2000000 in
-lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [CommSemiring R] [AddCommGroup M]
-    [AddCommGroup M₂] [Module R M] [Module R M₂] (I : Ideal R)  (f : M →ₗ[R] M₂) (h : Function.Surjective f)
-    : I • ⊤ ⊔ (LinearMap.ker f) = comap f (I • ⊤) := by
-  refine le_antisymm (sup_le (smul_top_le_comap_smul_top I f) (LinearMap.ker_le_comap f)) ?_
-  rw [← Submodule.comap_map_eq f (I • (⊤ : Submodule R M)), Submodule.comap_le_comap_iff_of_surjective h,
-    Submodule.map_smul'', Submodule.map_top, LinearMap.range_eq_top.mpr h]
 
 universe u v w
 
@@ -26,26 +19,10 @@ variable {R : Type u} [CommRing R] {M N : ModuleCat.{max u v} R} {n : ℕ}
 --#synth EnoughProjectives (ModuleCat.{max u v} R)
 
 local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
-  --CategoryTheory.HasExt.standard (ModuleCat.{max u v} R)
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
--- noncomputable instance : SMul R (Ext N M n) := {
---   smul r f :=
---     let g : Ext M M 0 := Ext.mk₀ (ModuleCat.ofHom (r • (1 : M →ₗ[R] M)))
---     Ext.comp f g (add_zero n)
--- }
-
--- noncomputable def Ext.smulLeft : R → Ext N M n → Ext N M n :=
---   fun x => ((x • ·) : Ext N M n → Ext N M n)
-
--- lemma Ext.smulLeft_zero_of_ann (x : R) (hx : x ∈ Module.annihilator R N) :
---     Ext.smulLeft x = (0 : Ext N M n → Ext N M n) := by
-
---   sorry
-
--- set_option diagnostics true in
 open Pointwise in
-set_option maxHeartbeats 400000 in
+set_option maxHeartbeats 1000000 in
 noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule R M)) ≃+ Ext.{w} N M rs.length := by
   generalize h' : rs.length = n
   induction' n with n hn generalizing M rs
@@ -99,16 +76,8 @@ noncomputable def lemma_213 : (N →ₗ[R] M ⧸ (ofList rs • ⊤ : Submodule 
           apply Function.Surjective.comp <;> exact Submodule.mkQ_surjective _
       refine ih.trans ?_
       have h4 : IsSMulRegular M r := ((isWeaklyRegular_cons_iff M r rs).mp hr).1
-      have : (Linear.toCatCenter R (ModuleCat R) r).app N = 0 := by
-        show ModuleCat.ofHom (r • (LinearMap.id (R := R) (M := N))) = 0
-        have : r ∈ Module.annihilator R N := by apply h; exact List.mem_cons_self
-        ext x; simpa using (Module.mem_annihilator.mp this x)
-      apply CategoryTheory.isoOfSubsingletonZeroMorphism
+      have : r ∈ Module.annihilator R N := by apply h; exact List.mem_cons_self
+      exact CategoryTheory.isoOfSubsingletonZeroMorphism
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₃' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
         (CategoryTheory.Abelian.Ext.covariant_sequence_exact₁' N (IsSMulRegular.SMul_ShortComplex_exact h4) n (n + 1) rfl)
-        (Iso.refl _) (Iso.refl _) (by aesop_cat) h_left_subsingleton
-      dsimp only
-      suffices ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N _) = 0 by
-        exact congrArg AddCommGrp.ofHom this
-      apply (CategoryTheory.homCommute M N (Linear.toCatCenter R (ModuleCat R) r) (n + 1)).trans ?_
-      simp [this]
+        (Iso.refl _) (Iso.refl _) (by aesop_cat) h_left_subsingleton (ext_hom_eq_zero_of_mem_ann this (n + 1))

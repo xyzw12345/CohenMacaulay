@@ -1,9 +1,8 @@
 import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.Ext0
-
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
-
+import CohenMacaulay.Dependency.ExtLemma
 import Mathlib.RingTheory.Regular.RegularSequence
 
 lemma Submodule.smul_top_eq_comap_smul_top_of_surjective {R M M₂ : Type*} [CommSemiring R] [AddCommGroup M]
@@ -22,8 +21,10 @@ variable {R : Type u} [CommRing R] {M N : ModuleCat.{max u v} R} {n : ℕ}
 local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{max u v} R)
 
-lemma ext_hom_eq_zero_of_mem_ann {r : R} (mem_ann : r ∈ Module.annihilator R N)
-    (reg : IsSMulRegular M r) (n : ℕ) :
-    (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M r).f).postcomp N (add_zero n))) = 0 := by
-
-  sorry
+lemma ext_hom_eq_zero_of_mem_ann {r : R} (mem_ann : r ∈ Module.annihilator R N) (n : ℕ) :
+    (AddCommGrp.ofHom ((Ext.mk₀ <| ModuleCat.ofHom (r • (LinearMap.id (M := M)))).postcomp N (add_zero n))) = 0 := by
+  have : (Linear.toCatCenter R (ModuleCat R) r).app N = 0 := by
+    ext x; simpa using (Module.mem_annihilator.mp mem_ann x)
+  apply congrArg AddCommGrp.ofHom
+  apply (CategoryTheory.homCommute M N (Linear.toCatCenter R (ModuleCat R) r) n).trans ?_
+  simp [this]
