@@ -64,19 +64,20 @@ noncomputable def HomologicalComplex.singleMapHomologicalComplexNatTrans (F G : 
     simp[h]
 end
 
-variable (α : (𝟭 C) ⟶ (𝟭 C))
+variable (α : CatCenter C)
 lemma HomologicalComplex.singleMapCenter : whiskerRight α (HomologicalComplex.single C c j) =
-  whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
-    have l := HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
-    simp only [HomologicalComplex.singleMapHomologicalComplexNatId, Iso.refl_hom] at l
-    have : 𝟙 (HomologicalComplex.single C c j) ≫ whiskerRight α (HomologicalComplex.single C c j) = whiskerRight α (HomologicalComplex.single C c j) := by
-      exact Category.id_comp (whiskerRight α (HomologicalComplex.single C c j))
-    rw [this] at l
-    have : whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ 𝟙 (HomologicalComplex.single C c j) = whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
-      exact
-        Category.comp_id
-          (whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c))
-    rw [this] at l
-    exact l
+    whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+  have l := HomologicalComplex.singleMapHomologicalComplexNatTrans c j (𝟭 C) (𝟭 C) α
+  simp only [HomologicalComplex.singleMapHomologicalComplexNatId, Iso.refl_hom] at l
+  have : 𝟙 (HomologicalComplex.single C c j) ≫ whiskerRight α (HomologicalComplex.single C c j) = whiskerRight α (HomologicalComplex.single C c j) := by
+    exact Category.id_comp (whiskerRight α (HomologicalComplex.single C c j))
+  rw [this] at l
+  have : whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) ≫ 𝟙 (HomologicalComplex.single C c j) = whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c) := by
+    exact Category.comp_id (whiskerLeft (HomologicalComplex.single C c j) (NatTrans.mapHomologicalComplex α c))
+  rw [this] at l
+  exact l
+
+
+
 
 end singleFunctor
