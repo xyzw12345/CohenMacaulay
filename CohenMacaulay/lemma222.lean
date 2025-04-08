@@ -2,7 +2,7 @@ import CohenMacaulay.lemma212
 import CohenMacaulay.lemma213'
 --import CohenMacaulay.FromPR.HasEnoughProjectives
 --import CohenMacaulay.FromPR.Ext0 --replace these two with above later
---import CohenMacaulay.Dependency.CategoryLemma
+import CohenMacaulay.Dependency.CategoryLemma
 import CohenMacaulay.Dependency.SMulRegular
 
 universe u v w
@@ -151,7 +151,7 @@ lemma lemma222_4_to_1 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (N : ModuleCa
           (ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _) smul_lt' exist_reg' (i - 1) lt)
         let gk := (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)))
         have mono_gk : Mono gk := mono_of_mono a kpos i mono_g
-        have zero_gk : gk = 0 := ext_hom_eq_zero_of_mem_ann hk (IsSMulRegular.pow k reg.1) i
+        have zero_gk : gk = 0 := ext_hom_eq_zero_of_mem_ann hk i
         exact subsingleton_of_mono_zero mono_gk zero_gk
 
 lemma lemma222 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
