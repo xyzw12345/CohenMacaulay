@@ -10,7 +10,7 @@ universe u v w
 open IsLocalRing LinearMap
 open RingTheory.Sequence Ideal CategoryTheory CategoryTheory.Abelian
 
-variable {R : Type u} [CommRing R] [IsNoetherianRing R]
+variable {R : Type u} [CommRing R]
    [UnivLE.{max u v, w}]
 
 local instance : CategoryTheory.HasExt.{w} (ModuleCat.{max u v} R) :=
@@ -21,7 +21,7 @@ set_option linter.unusedTactic false
 
 open Pointwise
 
-lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
+lemma lemma222_3_to_4 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M →
     I • (⊤ : Submodule R M) < ⊤ → (∃ N : ModuleCat R, Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N = PrimeSpectrum.zeroLocus I ∧ ∀ i < n, Subsingleton (Ext N M i)) →
     ∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs := by
@@ -72,6 +72,7 @@ lemma lemma222_3_to_4 (I : Ideal R) (n : ℕ) : ∀ M : ModuleCat R, Nontrivial 
       true_and, isRegular_cons_iff]
     exact ⟨mem, hxk, reg⟩
 
+set_option maxHeartbeats 250000 in
 lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat R}
     (f_mono : Mono (AddCommGrp.ofHom
       ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i)))) :
@@ -84,18 +85,18 @@ lemma mono_of_mono (a : R) {k : ℕ} (kpos : k > 0) (i : ℕ) {M N : ModuleCat R
       exact f_mono
     · have := Nat.zero_lt_of_ne_zero eq0
       have eq_comp : (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k * a)).f).postcomp N (add_zero i))) =
-      (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) ≫
-      (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i))) := by
+        (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i))) ≫
+        (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M a).f).postcomp N (add_zero i))) := by
         have : (a ^ k * a) • (LinearMap.id (R := R) (M := M)) =
           (a • (LinearMap.id (M := M))).comp ((a ^ k) • (LinearMap.id (M := M))) := by
           rw [LinearMap.comp_smul, LinearMap.smul_comp, smul_smul, LinearMap.id_comp]
-        simp only [SMul_ShortComplex, this, ModuleCat.ofHom_comp, ModuleCat.of_coe]
-        sorry
+        simp only [SMul_ShortComplex, this, ModuleCat.ofHom_comp, ModuleCat.of_coe,
+          ← extFunctorObj_map, (extFunctorObj N i).map_comp]
       rw [eq_comp]
       exact CategoryTheory.mono_comp' (ih (Nat.zero_lt_of_ne_zero eq0)) f_mono
 
 set_option maxHeartbeats 1000000 in
-lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
+lemma lemma222_4_to_1 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivial N)
     (Nfin : Module.Finite R N) (Nsupp : Module.support R N ⊆ PrimeSpectrum.zeroLocus I) :
     ∀ M : ModuleCat R, Nontrivial M → Module.Finite R M → I • (⊤ : Submodule R M) < ⊤ →
     (∃ rs : List R, rs.length = n ∧ (∀ r ∈ rs, r ∈ I) ∧ IsRegular M rs) →
@@ -150,12 +151,10 @@ lemma lemma222_4_to_1 (I : Ideal R) (n : ℕ) (N : ModuleCat R) (Nntr : Nontrivi
           (ih (ModuleCat.of R M') Qntr (Module.Finite.quotient R _) smul_lt' exist_reg' (i - 1) lt)
         let gk := (AddCommGrp.ofHom ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)))
         have mono_gk : Mono gk := mono_of_mono a kpos i mono_g
-        have zero_gk : AddCommGrp.ofHom
-          ((Ext.mk₀ (SMul_ShortComplex M (a ^ k)).f).postcomp N (add_zero i)) = 0 := by
-          exact ext_hom_eq_zero_of_mem_ann hk (IsSMulRegular.pow k reg.1) i
-        exact subsingleton_of_mono mono_gk zero_gk
+        have zero_gk : gk = 0 := ext_hom_eq_zero_of_mem_ann hk (IsSMulRegular.pow k reg.1) i
+        exact subsingleton_of_mono_zero mono_gk zero_gk
 
-lemma lemma222 (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
+lemma lemma222 [IsNoetherianRing R] (I : Ideal R) (n : ℕ) (M : ModuleCat R) (Mntr : Nontrivial M)
     (Mfin : Module.Finite R M) (smul_lt : I • (⊤ : Submodule R M) < ⊤) :
   [∀ N : ModuleCat R, (Nontrivial N ∧ Module.Finite R N ∧
     Module.support R N ⊆ PrimeSpectrum.zeroLocus I) → ∀ i < n, Subsingleton (Ext N M i),

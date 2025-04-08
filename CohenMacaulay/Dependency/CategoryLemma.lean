@@ -27,7 +27,7 @@ theorem mono_of_subsingleton (h0 : Subsingleton C.X₁) : Mono C.g := by
   simp only [Subsingleton.eq_zero y, map_zero] at hy
   simp [← hy]
 
-lemma subsingleton_of_mono {X Y : AddCommGrp.{u}} {f : X ⟶ Y} (mono : Mono f)
+lemma subsingleton_of_mono_zero {X Y : AddCommGrp.{u}} {f : X ⟶ Y} (mono : Mono f)
     (eq0 : f = 0) : Subsingleton X := by
   apply subsingleton_of_forall_eq 0
   intro x
