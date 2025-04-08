@@ -4,7 +4,7 @@ import CohenMacaulay.lemma212
 import CohenMacaulay.lemma213'
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.CategoryLemma
-import CohenMacaulay.Dependency.ExtLemma
+import CohenMacaulay.FromPR.ExtLinear
 import Mathlib
 
 universe u v w

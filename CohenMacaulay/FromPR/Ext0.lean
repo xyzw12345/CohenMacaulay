@@ -22,7 +22,7 @@ noncomputable def homEquiv₀_hom : Ext X Y 0 ≃+ (X ⟶ Y) where
 
 namespace Ext
 
-lemma mk₀_add (f g : X ⟶ Y) : mk₀ (f + g) = mk₀ f + mk₀ g := sorry
+-- lemma mk₀_add (f g : X ⟶ Y) : mk₀ (f + g) = mk₀ f + mk₀ g := sorry
 
 end Ext
 
