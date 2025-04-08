@@ -1,12 +1,14 @@
 import CohenMacaulay.Dependency.AssociatedPrime
 import CohenMacaulay.Dependency.CategoryLemma
-import CohenMacaulay.Dependency.ExtLemma
 import CohenMacaulay.Dependency.SMulRegular
 import CohenMacaulay.Dependency.StableSES
+import CohenMacaulay.DeprecatedFile.CategoryCenter
+import CohenMacaulay.DeprecatedFile.ExtLemma
 import CohenMacaulay.FromPR.Center.Basic
 import CohenMacaulay.FromPR.Center.Linear
 import CohenMacaulay.FromPR.Center.Localization
 import CohenMacaulay.FromPR.Ext0
+import CohenMacaulay.FromPR.ExtLinear
 import CohenMacaulay.FromPR.HasEnoughProjectives
 import CohenMacaulay.FromPR.RelSeries
 import CohenMacaulay.HomLoc_exchange
