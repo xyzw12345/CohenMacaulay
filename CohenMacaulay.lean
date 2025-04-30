@@ -15,3 +15,4 @@ import CohenMacaulay.HomLoc_exchange
 import CohenMacaulay.lemma212
 import CohenMacaulay.lemma213'
 import CohenMacaulay.lemma222
+import CohenMacaulay.depth
