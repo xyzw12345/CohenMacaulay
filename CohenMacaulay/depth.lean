@@ -27,3 +27,19 @@ noncomputable def has_finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : Mod
 
 noncomputable def finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] (hfindep : has_finite_depth M): ℕ :=
   WithTop.untop (WithBot.unbot (depth M) (hfindep.1)) hfindep.2
+
+theorem depth_le_ringKrullDim_associatedPrime [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
+    [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)]
+    (P : associatedPrimes R M) : depth M ≤ ringKrullDim (R ⧸ P.1) := sorry
+
+theorem depth_le_ringKrullDim [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
+    [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)] :
+    depth M ≤ ringKrullDim R := sorry
+
+theorem exist_nontrivial_ext [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
+    [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)] : ∃ i : ℕ,
+    Nontrivial (Ext.{v} (ModuleCat.of R (Shrink.{v} (R ⧸ IsLocalRing.maximalIdeal R))) M i) := sorry
+
+theorem depth_eq_nat_find [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
+    [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)] :
+    depth M = Nat.find (exist_nontrivial_ext M) := sorry
