@@ -30,4 +30,4 @@ noncomputable def finite_projdim (M : ModuleCat.{v} R) (hfinpd : has_finite_proj
 ---  apply Module.Finite.self R
 
 ---Some conditions are redundant
-theorem AuslanderBuchsbaum [IsNoetherianRing R] [IsLocalRing R] [Module.Finite R (ModuleCat.of R (Shrink.{v} R))] [Nontrivial (ModuleCat.of R (Shrink.{v} R))] (M : ModuleCat.{v} R) [Nontrivial M] [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] (hfinpd: has_finite_projdim M) (hfindepM: has_finite_depth M) (hfindepR: has_finite_depth (ModuleCat.of R (Shrink.{v} R))): (finite_projdim M hfinpd) + (finite_depth M hfindepM) = (finite_depth (ModuleCat.of R (Shrink.{v} R)) hfindepR) := by sorry
+--theorem AuslanderBuchsbaum [IsNoetherianRing R] [IsLocalRing R] [Module.Finite R (ModuleCat.of R (Shrink.{v} R))] [Nontrivial (ModuleCat.of R (Shrink.{v} R))] (M : ModuleCat.{v} R) [Nontrivial M] [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] (hfinpd: has_finite_projdim M) (hfindepM: has_finite_depth M) (hfindepR: has_finite_depth (ModuleCat.of R (Shrink.{v} R))): (finite_projdim M hfinpd) + (finite_depth M hfindepM) = (finite_depth (ModuleCat.of R (Shrink.{v} R)) hfindepR) := by sorry

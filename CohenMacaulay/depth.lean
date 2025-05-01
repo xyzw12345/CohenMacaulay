@@ -15,24 +15,30 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{v} R) :=
 
 open Classical
 
-noncomputable def moduleDepth [IsNoetherianRing R] [IsLocalRing R] (M N : ModuleCat.{v} R) : ℕ∞ :=
+noncomputable def moduleDepth (M N : ModuleCat.{v} R) : ℕ∞ :=
   sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext N M i)}
 
-noncomputable def ideal_depth [IsNoetherianRing R] [IsLocalRing R] (I : Ideal R)(M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ I)] : ℕ∞ :=
+noncomputable def Ideal.depth (I : Ideal R)(M : ModuleCat.{v} R) [Small.{v} (R ⧸ I)] : ℕ∞ :=
   sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i)}
 
-noncomputable def depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] : ℕ∞ :=
-  ideal_depth (IsLocalRing.maximalIdeal R) M
+noncomputable def IsLocalRing.depth [IsLocalRing R] (M : ModuleCat.{v} R)
+    [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] : ℕ∞ :=
+  (IsLocalRing.maximalIdeal R).depth M
+
+theorem depth_le_ringKrullDim_associatedPrime [IsNoetherianRing R] [IsLocalRing R]
+    [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)]
+    (M : ModuleCat.{v} R) [Module.Finite R M] [Nontrivial M]
+    (P : associatedPrimes R M) : depth M ≤ ringKrullDim (R ⧸ P.1) := by
+
+  sorry
+
 /-
-noncomputable def has_finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))]: Prop :=
-  ∃ h : depth M ≠ ⊥, WithBot.unbot (depth M) h ≠ ⊤
+lemma has_finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
+  [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))]: Prop :=
+  depth M ≠ ⊤
 
 noncomputable def finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] (hfindep : has_finite_depth M): ℕ :=
   WithTop.untop (WithBot.unbot (depth M) (hfindep.1)) hfindep.2
-
-theorem depth_le_ringKrullDim_associatedPrime [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
-    [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)]
-    (P : associatedPrimes R M) : depth M ≤ ringKrullDim (R ⧸ P.1) := sorry
 
 theorem depth_le_ringKrullDim [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
     [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)] :
