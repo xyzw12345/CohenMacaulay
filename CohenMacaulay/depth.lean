@@ -14,14 +14,16 @@ local instance : CategoryTheory.HasExt.{w} (ModuleCat.{v} R) :=
   CategoryTheory.hasExt_of_enoughProjectives.{w} (ModuleCat.{v} R)
 
 open Classical
-noncomputable def ideal_depth [IsNoetherianRing R] [IsLocalRing R] (I : Ideal R)(M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ I)]: WithBot ℕ∞ :=
-  if {i: ℕ | ¬Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i)} = ∅ then
-    sorry
-  else
-    (↑(sInf {i: ℕ | ¬Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i)}) : WithBot ℕ∞)
 
-noncomputable def depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))]: WithBot ℕ∞ := ideal_depth (IsLocalRing.maximalIdeal R) M
+noncomputable def moduleDepth [IsNoetherianRing R] [IsLocalRing R] (M N : ModuleCat.{v} R) : ℕ∞ :=
+  sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext N M i)}
 
+noncomputable def ideal_depth [IsNoetherianRing R] [IsLocalRing R] (I : Ideal R)(M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ I)] : ℕ∞ :=
+  sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i)}
+
+noncomputable def depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] : ℕ∞ :=
+  ideal_depth (IsLocalRing.maximalIdeal R) M
+/-
 noncomputable def has_finite_depth [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R) [Module.Finite R M] [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))]: Prop :=
   ∃ h : depth M ≠ ⊥, WithBot.unbot (depth M) h ≠ ⊤
 
@@ -43,3 +45,4 @@ theorem exist_nontrivial_ext [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat
 theorem depth_eq_nat_find [IsNoetherianRing R] [IsLocalRing R] (M : ModuleCat.{v} R)
     [Module.Finite R M] [Nontrivial M] [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)] :
     depth M = Nat.find (exist_nontrivial_ext M) := sorry
+ -/
