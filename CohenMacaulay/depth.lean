@@ -19,12 +19,16 @@ noncomputable def moduleDepth (M N : ModuleCat.{v} R) : ℕ∞ :=
   sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext N M i)}
 
 noncomputable def Ideal.depth (I : Ideal R)(M : ModuleCat.{v} R) [Small.{v} (R ⧸ I)] : ℕ∞ :=
-  sSup {n : ℕ∞ | ∀ i : ℕ, i < n → Subsingleton (Ext (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M i)}
+  moduleDepth (ModuleCat.of R (Shrink.{v} (R ⧸ I))) M
 
 noncomputable def IsLocalRing.depth [IsLocalRing R] (M : ModuleCat.{v} R)
     [Small.{v} (R ⧸ (IsLocalRing.maximalIdeal R))] : ℕ∞ :=
   (IsLocalRing.maximalIdeal R).depth M
-
+/-
+theorem moduleDepth_ge_depth_sub_dim [IsNoetherianRing R] [IsLocalRing R] (M N : ModuleCat.{v} R)
+    [Module.Finite R M] [Module.Finite R N] [Nontrivial M] [Nontrivial N] :
+    moduleDepth M N ≥ depth M - **dim N**
+-/
 theorem depth_le_ringKrullDim_associatedPrime [IsNoetherianRing R] [IsLocalRing R]
     [Small.{v} (R ⧸ IsLocalRing.maximalIdeal R)]
     (M : ModuleCat.{v} R) [Module.Finite R M] [Nontrivial M]
